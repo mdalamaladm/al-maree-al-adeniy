@@ -1,2 +1,7 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<h1>الشيخ عبد الرحمن ين مرعي العدني</h1>
+<div>
+    <a href="/muhadharah">المحاضرات</a>
+    <a href="/khuthab">الخطب</a>
+    <a href="/durus">الدروس</a>
+    <a href="/fatawa">الفتاوى</a>
+</div>
