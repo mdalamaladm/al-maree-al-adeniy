@@ -12,6 +12,7 @@ const config: Config = {
           secondary: '#97935C',
           'accent': '#D3F7AD',
           'dark-accent': '#95BB76',
+          'darker-accent': '#72905A',
           error: '#E23645',
           warning: '#EDC25E',
           success: '#84D959',
