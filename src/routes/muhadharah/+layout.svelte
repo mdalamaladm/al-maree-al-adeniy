@@ -2,5 +2,7 @@
 	let { children } = $props();
 </script>
 
-<a href="/">الرئيسية</a>
-{@render children()}
+<section class="h-full bg-maree-main">
+	<a href="/">الرئيسية</a>
+	{@render children()}
+</section>
