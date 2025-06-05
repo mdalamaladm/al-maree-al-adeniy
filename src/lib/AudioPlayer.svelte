@@ -9,11 +9,11 @@
   let currentTime = $state(0);
   let seekable = $state(0);
   let isPlay = $state(false);
+  let isMouseDown = $state(false);
 
   let l = $derived.by(() => {
     const current = currentTime;
     const block = seekable / chunk;
-    console.log(current, block)
 
     return {
       block,
@@ -66,7 +66,6 @@
     seekable = audioElement.seekable.length ? (audioElement.seekable.end(audioElement.seekable.length - 1)) : 0;
 
     audioElement.addEventListener('timeupdate', (event) => {
-      console.log(event.target.currentTime);
       currentTime = event.target.currentTime;
     })
   }
@@ -80,15 +79,52 @@
       isPlay = true;
     }
   }
+
+  function onMouseDown (e, i) {
+    e.preventDefault();
+    if (e.offsetX >= 0) {
+      isMouseDown = true;
+      console.log((i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth))));
+      audioElement.currentTime = (i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth)));
+    }
+  }
+
+  function onMouseMove (e, i) {
+    if (isMouseDown && e.offsetX >= 0) {
+      console.log((i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth))));
+      audioElement.currentTime = (i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth)));
+    }
+  }
+
+  function onKeyDown (e) {
+    if (isPlay) {
+      if (e.code === 'ArrowLeft') {
+        if (audioElement.currentTime + 10 > seekable) {
+          audioElement.currentTime = seekable;
+        } else {
+          audioElement.currentTime += 10;
+        }
+      } else if (e.code === 'ArrowRight') {
+        if (audioElement.currentTime - 10 < 0) {
+          audioElement.currentTime = 0;
+        } else {
+          audioElement.currentTime -= 10;
+        }
+      }
+    }
+  }
 </script>
 
+<svelte:window onkeydown={onKeyDown} />
+
 <div>
-  <audio controls controlsList="nodownload"></audio>
+  <audio controls controlsList="nodownload" preload="metadata" loop></audio>
   <div class="flex flex-col items-center">
+    <button onclick={() => { audioElement.currentTime = 200 }}>Ceck</button>
     <div class="flex items-center">
       <div class="flex items-center h-48" dir="rtl">
         {#each amplitudes as ap, i}
-          <div class="flex-none w-2.5 max-h-48 mr-[1.5px] transition-[height]" style="height: {ap < 0 ? (0.05 * 200) : (ap * 200)}px; background: {ap < 0 ? '#95BB76' : (l.current >= i * l.block && l.current <= (i + 1) * l.block ? `linear-gradient(to left, #D3F7AD ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%, #95BB76 ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%)` : (l.current <= (i + 1) * l.block ? '#95BB76' : '#D3F7AD'))}"></div>
+          <div onmousedown={(e) => onMouseDown(e, i)} onmousemove={(e) => onMouseMove(e, i)} onmouseup={() => isMouseDown = false} class="flex-none w-2.5 max-h-48 mr-[1.5px] transition-[height]" style="height: {ap < 0 ? (0.05 * 200) : (ap * 200)}px; background: {ap < 0 ? '#95BB76' : (l.current >= i * l.block && l.current <= (i + 1) * l.block ? `linear-gradient(to left, #D3F7AD ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%, #95BB76 ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%)` : (l.current <= (i + 1) * l.block ? '#95BB76' : '#D3F7AD'))}"></div>
         {/each}
       </div>
       <button onclick={onPlay} class="flex-none flex justify-center items-center p-5 ml-10 bg-maree-dark-accent text-maree-accent rounded-full cursor-pointer">
