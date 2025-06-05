@@ -10,6 +10,7 @@
   let seekable = $state(0);
   let isPlay = $state(false);
   let isMouseDown = $state(false);
+  let isReady = $state(false);
 
   let l = $derived.by(() => {
     const current = currentTime;
@@ -65,12 +66,21 @@
     currentTime = audioElement.currentTime;
     seekable = audioElement.seekable.length ? (audioElement.seekable.end(audioElement.seekable.length - 1)) : 0;
 
-    audioElement.addEventListener('timeupdate', (event) => {
-      currentTime = event.target.currentTime;
-    })
+    isReady = true;
+  }
+
+  function onTimeUpdate (e) {
+    currentTime = e.target.currentTime;
+  }
+
+  function onEnded () {
+    isPlay = false;
+    audioElement.currentTime = 0;
   }
 
   function onPlay () {
+    if (!isReady) return;
+
     if (isPlay) {
       audioElement.pause();
       isPlay = false;
@@ -81,17 +91,18 @@
   }
 
   function onMouseDown (e, i) {
+    if (!isReady) return;
+
     e.preventDefault();
+
     if (e.offsetX >= 0) {
       isMouseDown = true;
-      console.log((i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth))));
       audioElement.currentTime = (i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth)));
     }
   }
 
   function onMouseMove (e, i) {
     if (isMouseDown && e.offsetX >= 0) {
-      console.log((i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth))));
       audioElement.currentTime = (i * l.block) + (l.block * (1 - (e.offsetX / e.target.offsetWidth)));
     }
   }
@@ -118,9 +129,8 @@
 <svelte:window onkeydown={onKeyDown} />
 
 <div>
-  <audio controls controlsList="nodownload" preload="metadata" loop></audio>
+  <audio ontimeupdate={onTimeUpdate} onended={onEnded} controls controlsList="nodownload" preload="metadata" class="hidden"></audio>
   <div class="flex flex-col items-center">
-    <button onclick={() => { audioElement.currentTime = 200 }}>Ceck</button>
     <div class="flex items-center">
       <div class="flex items-center h-48" dir="rtl">
         {#each amplitudes as ap, i}
