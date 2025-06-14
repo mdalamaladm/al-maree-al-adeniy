@@ -1,8 +1,8 @@
 <script>
-  import AudioPlayer from "$lib/AudioPlayer.svelte";
-	import HomeIcon from "$lib/HomeIcon.svelte";
-	import Playlist from "$lib/Playlist.svelte";
-	import PlaylistIcon from "$lib/PlaylistIcon.svelte";
+  import AudioPlayer from "$lib/components/AudioPlayer.svelte";
+	import HomeIcon from "$lib/icons/HomeIcon.svelte";
+	import Playlist from "$lib/components/Playlist.svelte";
+	import PlaylistIcon from "$lib/icons/PlaylistIcon.svelte";
 
   let showModal = $state(false);
   let playlist = $state([

@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import PlayButton from "$lib/PlayButton.svelte";
+	import PlayButton from "$lib/components/PlayButton.svelte";
 
   let { src, handleEnd } = $props();
 

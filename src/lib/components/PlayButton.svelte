@@ -1,7 +1,7 @@
 <script>
-	import PauseIcon from "$lib/PauseIcon.svelte";
-	import PlayIcon from "$lib/PlayIcon.svelte";
-	import LoadingIcon from "./LoadingIcon.svelte";
+	import PauseIcon from "$lib/icons/PauseIcon.svelte";
+	import PlayIcon from "$lib/icons/PlayIcon.svelte";
+	import LoadingIcon from "$lib/icons/LoadingIcon.svelte";
 
   let { onPlay, isReady, isPlay, class: className } = $props();
 </script>
