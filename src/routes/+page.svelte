@@ -2,19 +2,19 @@
   let navigations = [
     {
       name: 'المحاضرات',
-      href: '/muhadharah',
+      href: '/audio/muhadharah',
     },
     {
       name: 'الخطب',
-      href: '/khuthab',
+      href: '/audio/khuthab',
     },
     {
       name: 'الدروس',
-      href: '/durus',
+      href: '/audio/durus',
     },
     {
       name: 'الفتاوى',
-      href: '/fatwa',
+      href: '/audio/fatwa',
     },
   ]
 </script>

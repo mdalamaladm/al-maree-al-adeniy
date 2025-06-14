@@ -4,6 +4,8 @@
 	import Playlist from "$lib/components/Playlist.svelte";
 	import PlaylistIcon from "$lib/icons/PlaylistIcon.svelte";
 
+  let { data } = $props();
+
   let showModal = $state(false);
   let playlist = $state([
     {
@@ -195,7 +197,7 @@
           font-medium
         "
       >
-        المحاضرات
+        {data.name}
       </h1>
       <div
         class="
