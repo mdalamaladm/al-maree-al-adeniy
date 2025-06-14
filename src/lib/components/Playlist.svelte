@@ -15,7 +15,6 @@
       grid
       grid-cols-1
       place-content-center
-      mx-5
       xl:mx-10
       mb-3
     "
@@ -46,7 +45,6 @@
       w-72
       lg:w-80
       xl:w-[400px]
-      mx-5
       xl:mx-10
       p-5
       bg-maree-dark-accent

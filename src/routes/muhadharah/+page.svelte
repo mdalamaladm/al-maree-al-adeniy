@@ -89,7 +89,15 @@
   function onCloseModal (e) {
     if (e.target.classList.contains('the-layout')) showModal = false;
   }
+  
+  function onResize () {
+    showModal = false;
+  }
 </script>
+
+<svelte:window
+  onresize={onResize}
+/>
 
 
 <section
@@ -120,7 +128,12 @@
         {trackNumber}
         class="
           h-full
-          w-fit
+          w-full
+          max-w-[400px]
+        "
+        listClass="
+          w-full
+          max-w-[400px]
         "
       />
     </div>
