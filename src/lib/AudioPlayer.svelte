@@ -190,26 +190,97 @@
   })
 </script>
 
-<svelte:window onkeydown={onKeyDown} onresize={onResize}/>
+<svelte:window
+  onkeydown={onKeyDown}
+  onresize={onResize}
+/>
 
 <div>
-  <audio ontimeupdate={onTimeUpdate} onended={onEnded} controls controlsList="nodownload" preload="metadata" class="hidden"></audio>
-  <div class="grid grid-cols-6 gap-10 mx-5 xl:mx-10">
-    <div class="col-span-6 justify-self-center flex items-center">
-      <PlayButton {onPlay} {isReady} {isPlay} class="hidden lg:grid ml-10" />
-      <div class="flex items-center h-48">
+  <audio
+    ontimeupdate={onTimeUpdate}
+    onended={onEnded}
+    controls
+    controlsList="nodownload"
+    preload="metadata"
+    class="hidden"
+  ></audio>
+  <div
+    class="
+      grid
+      grid-cols-6
+      gap-10
+      mx-5
+      xl:mx-10
+    "
+  >
+    <div
+      class="
+        col-span-6
+        justify-self-center
+        flex
+        items-center
+      "
+    >
+      <PlayButton
+        {onPlay}
+        {isReady}
+        {isPlay}
+        class="
+          hidden
+          lg:grid
+          ml-10
+        "
+      />
+      <div
+        class="
+          flex
+          items-center
+          h-48
+        "
+      >
         {#each amplitudes as ap, i}
           <div
             onmousedown={(e) => onMouseDown(e, i)}
             onmousemove={(e) => onMouseMove(e, i)}
             onmouseup={() => isMouseDown = false}
-            class="flex-none w-2 lg:w-2.5 max-h-48 mr-[1.5px] transition-[height]"
-            style="height: {ap < 0 ? (0.05 * 200) : (ap * 200)}px; background: {ap < 0 ? '#95BB76' : (l.current >= i * l.block && l.current <= (i + 1) * l.block ? `linear-gradient(to left, #D3F7AD ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%, #95BB76 ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%)` : (l.current <= (i + 1) * l.block ? '#95BB76' : '#D3F7AD'))}"
+            class="
+              flex-none
+              w-2
+              lg:w-2.5
+              max-h-48
+              mr-[1.5px]
+              transition-[height]
+            "
+            style="
+              height: {ap < 0 ? (0.05 * 200) : (ap * 200)}px;
+              background: {ap < 0 ? '#95BB76' : (l.current >= i * l.block && l.current <= (i + 1) * l.block ? `linear-gradient(to left, #D3F7AD ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%, #95BB76 ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%)` : (l.current <= (i + 1) * l.block ? '#95BB76' : '#D3F7AD'))}
+            "
           ></div>
         {/each}
       </div>
     </div>
-    <PlayButton {onPlay} {isReady} {isPlay} class="lg:hidden" />
-    <p class="col-span-6 lg:col-span-6 sm:col-span-3 justify-self-center self-center sm:my-10 text-3xl text-maree-dark-accent font-bold">{time}</p>
+    <PlayButton
+      {onPlay}
+      {isReady}
+      {isPlay}
+      class="
+        lg:hidden
+      "
+    />
+    <p
+      class="
+        col-span-6
+        lg:col-span-6
+        sm:col-span-3
+        justify-self-center
+        self-center
+        sm:my-10
+        text-3xl
+        text-maree-dark-accent
+        font-bold
+      "
+    >
+      {time}
+    </p>
   </div>
 </div>

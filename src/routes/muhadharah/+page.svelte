@@ -1,9 +1,10 @@
 <script>
   import AudioPlayer from "$lib/AudioPlayer.svelte";
+	import HomeIcon from "$lib/HomeIcon.svelte";
 	import Playlist from "$lib/Playlist.svelte";
+	import PlaylistIcon from "$lib/PlaylistIcon.svelte";
 
   let showModal = $state(false);
-  let search = $state('');
   let playlist = $state([
     {
       id: 1,
@@ -67,10 +68,6 @@
     }
   ]);
 
-  let searchedPlaylist = $derived.by(() => {
-    return playlist.filter(s => s.name.includes(search));
-  });
-
   let trackNumber = $state(1);
 
   let track = $derived.by(() => {
@@ -95,42 +92,130 @@
 </script>
 
 
-<section class="min-h-screen pb-10 bg-maree-main">
+<section
+  class="
+    min-h-screen
+    pb-10
+    bg-maree-main
+  "
+>
   {#if showModal}
     <div
       onclick={onCloseModal}
-      class="the-layout fixed w-full min-h-full p-10 inset-0 z-50 bg-gray-500/75 transition-opacity"
+      class="
+        the-layout
+        fixed
+        w-full
+        min-h-full
+        p-10
+        inset-0
+        z-50
+        bg-gray-500/75
+        transition-opacity
+      "
     >
-      <Playlist {onChangeAudio} {playlist} {trackNumber} class="h-full w-fit" />
+      <Playlist
+        {onChangeAudio}
+        {playlist}
+        {trackNumber}
+        class="
+          h-full
+          w-fit
+        "
+      />
     </div>
   {/if}
-	<div class="flex justify-between lg:justify-start">
-    <a href="/" class="m-5 text-maree-dark-accent">
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10">
-				<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
-				<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
-			</svg>
+	<div
+    class="
+      flex
+      justify-between
+      lg:justify-start
+    "
+  >
+    <a
+      href="/"
+      class="
+        m-5
+        text-maree-dark-accent
+      "
+    >
+			<HomeIcon />
 		</a>
 		<button
       onclick={() => showModal = true}
-      class="lg:hidden m-5 text-maree-dark-accent cursor-pointer"
+      class="
+        lg:hidden
+        m-5
+        text-maree-dark-accent
+        cursor-pointer
+      "
     >
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10">
-				<path fill-rule="evenodd" d="M2.625 6.75a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Zm4.875 0A.75.75 0 0 1 8.25 6h12a.75.75 0 0 1 0 1.5h-12a.75.75 0 0 1-.75-.75ZM2.625 12a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0ZM7.5 12a.75.75 0 0 1 .75-.75h12a.75.75 0 0 1 0 1.5h-12A.75.75 0 0 1 7.5 12Zm-4.875 5.25a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Zm4.875 0a.75.75 0 0 1 .75-.75h12a.75.75 0 0 1 0 1.5h-12a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
-			</svg>
+			<PlaylistIcon />
 		</button>
 	</div>
-  <div class="lg:flex lg:justify-center lg:items-stretch">
-    <Playlist {onChangeAudio} {playlist} {trackNumber} class="hidden lg:block" listClass="min-h-[550px]" />
+  <div
+    class="
+      lg:flex
+      lg:justify-center
+      lg:items-stretch
+    "
+  >
+    <Playlist
+      {onChangeAudio}
+      {playlist}
+      {trackNumber}
+      class="
+        hidden
+        lg:block
+      "
+      listClass="
+        min-h-[550px]
+      "
+    />
     <div>
-      <h1 class="my-2 text-center text-5xl text-maree-secondary font-medium">المحاضرات</h1>
-      <div class="flex justify-center my-5">
-        <select class="py-5 px-10 text-2xl">
+      <h1
+        class="
+          my-2
+          text-center
+          text-5xl
+          text-maree-secondary
+          font-medium
+        "
+      >
+        المحاضرات
+      </h1>
+      <div
+        class="
+          flex
+          justify-center
+          my-5
+        "
+      >
+        <select
+          class="
+            py-5
+            px-10
+            text-2xl
+          "
+        >
           <option>العقيدة والتوحيد</option>
         </select>
       </div>
-      <p class="mb-10 text-maree-secondary text-3xl font-medium text-center">{track.name}</p>
-      <AudioPlayer src={track.src} {handleEnd} />
+      <p
+        class="
+          mb-10
+          text-maree-secondary
+          text-3xl
+          font-medium
+          text-center
+        "
+      >
+        {track.name}
+      </p>
+      <AudioPlayer
+        src={track.src}
+        {handleEnd}
+      />
     </div>
   </div>
 </section>
