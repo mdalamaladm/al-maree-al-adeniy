@@ -1,13 +1,180 @@
 <script>
   import AudioPlayer from "$lib/AudioPlayer.svelte";
+
+  let showModal = $state(false);
+  let search = $state('');
+  let playlist = $state([
+    {
+      id: 1,
+      name: 'صلة الرحم',
+      src: '/sample-1.mp3',
+    },
+    {
+      id: 2,
+      name: 'الاعتصام بالسنة والحذر من البدعة',
+      src: '/sample-2.mp3',
+    },
+    {
+      id: 3,
+      name: 'الفوز والنجاح بالتمسك بالكتاب والسنة',
+      src: '/sample-3.mp3',
+    },
+    {
+      id: 4,
+      name: 'من اصول اهل السنة',
+      src: '/sample-4.mp3',
+    },
+    {
+      id: 5,
+      name: 'شكر نعم الله تعالى',
+      src: '/sample-5.mp3',
+    },
+    {
+      id: 6,
+      name: 'الله يدعو إلى دينه',
+      src: '/sample-6.mp3',
+    },
+    {
+      id: 7,
+      name: 'محاضرة جامعة في احكام الصيام',
+      src: '/sample-7.mp3',
+    },
+    {
+      id: 8,
+      name: 'حاجتنا إلى العمل الصالح',
+      src: '/sample-8.mp3',
+    },
+    {
+      id: 9,
+      name: 'التمسك بدين الله سر نجاح الأمة',
+      src: '/sample-9.mp3',
+    },
+    {
+      id: 10,
+      name: 'الآلات التي يحتاج إليها الدعاة إلى الله',
+      src: '/sample-10.mp3',
+    },
+    {
+      id: 11,
+      name: 'الحذر من فتنة القتل',
+      src: '/sample-11.mp3',
+    },
+    {
+      id: 12,
+      name: 'شكر نعمة الإسلام والسنة',
+      src: '/sample-12.mp3',
+    }
+  ]);
+
+  let searchedPlaylist = $derived.by(() => {
+    return playlist.filter(s => s.name.includes(search));
+  });
+
+  let trackNumber = $state(1);
+
+  let track = $derived.by(() => {
+    return playlist.find(s => s.id === trackNumber);
+  });
+
+  function onChangeAudio (id) {
+    trackNumber = id;
+  }
+
+  function handleEnd () {
+    if (trackNumber === playlist.length - 1) {
+      trackNumber = 0;
+    } else {
+      trackNumber++;
+    }
+  }
+
+  function onCloseModal (e) {
+    if (e.target.classList.contains('the-layout')) showModal = false;
+  }
 </script>
 
-<div>
-  <h1 class="my-2 text-center text-5xl text-maree-secondary font-medium">المحاضرات</h1>
-  <div class="flex justify-center my-5">
-    <select class="py-5 px-10 text-2xl">
-      <option>العقيدة والتوخيد</option>
-    </select>
+
+<section class="min-h-screen pb-10 bg-maree-main">
+  {#if showModal}
+    <div
+      onclick={onCloseModal}
+      class="the-layout fixed w-full min-h-full p-10 inset-0 z-50 bg-gray-500/75 transition-opacity"
+    >
+      <div class="h-full w-fit">
+        <div class="grid grid-cols-1 place-content-centerw-full sm:w-96 mb-3">
+          <input
+            class="col-span-1 p-2 bg-maree-accent text-xl text-maree-darker-accent font-medium rounded-xl"
+            type="text"
+            name="search"
+            id="search"
+            placeholder="ابحث"
+            bind:value={search}
+          >
+        </div>
+        <div class="flex flex-col h-[calc(100vh-160px)] w-full sm:w-96 p-5 bg-maree-dark-accent rounded-xl overflow-auto [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-maree-accent [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-maree-darker-accent [&::-webkit-scrollbar-thumb]:rounded-full">
+          {#each searchedPlaylist as sound (sound.id)}
+            <button
+              onclick={() => {
+                onChangeAudio(sound.id);
+                showModal = false;
+              }}
+              class={`flex-none p-3 mb-2 ${trackNumber === sound.id ? 'bg-maree-darker-accent' : ''} hover:bg-maree-darker-accent active:bg-maree-darker-accent text-start text-xl text-maree-accent font-medium cursor-pointer rounded-xl`}
+            >
+              {sound.name}
+            </button>
+          {/each}
+        </div>
+      </div>
+    </div>
+  {/if}
+	<div class="flex justify-between lg:justify-end">
+    <a href="/" class="m-5 text-maree-dark-accent">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10">
+				<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
+				<path d="m12 5.432 8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 0 1-.75-.75v-4.5a.75.75 0 0 0-.75-.75h-3a.75.75 0 0 0-.75.75V21a.75.75 0 0 1-.75.75H5.625a1.875 1.875 0 0 1-1.875-1.875v-6.198a2.29 2.29 0 0 0 .091-.086L12 5.432Z" />
+			</svg>
+		</a>
+		<button
+      onclick={() => showModal = true}
+      class="lg:hidden m-5 text-maree-dark-accent cursor-pointer"
+    >
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10">
+				<path fill-rule="evenodd" d="M2.625 6.75a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Zm4.875 0A.75.75 0 0 1 8.25 6h12a.75.75 0 0 1 0 1.5h-12a.75.75 0 0 1-.75-.75ZM2.625 12a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0ZM7.5 12a.75.75 0 0 1 .75-.75h12a.75.75 0 0 1 0 1.5h-12A.75.75 0 0 1 7.5 12Zm-4.875 5.25a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Zm4.875 0a.75.75 0 0 1 .75-.75h12a.75.75 0 0 1 0 1.5h-12a.75.75 0 0 1-.75-.75Z" clip-rule="evenodd" />
+			</svg>
+		</button>
+	</div>
+  <div class="lg:flex lg:justify-center lg:items-stretch">
+    <div>
+      <div class="grid grid-cols-1 place-content-center mx-5 xl:mx-10 mb-3">
+        <input
+          class="hidden lg:inline col-span-1 p-2 bg-maree-accent text-xl text-maree-darker-accent font-medium rounded-xl"
+          type="text"
+          name="search"
+          id="search"
+          placeholder="ابحث"
+          bind:value={search}
+        >
+      </div>
+      <div class="flex-none hidden lg:flex flex-col h-[calc(100vh-200px)] w-72 lg:w-80 xl:w-[400px] mx-5 xl:mx-10 p-5 bg-maree-dark-accent rounded-xl overflow-auto [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-maree-accent [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-maree-darker-accent [&::-webkit-scrollbar-thumb]:rounded-full">
+        {#each searchedPlaylist as sound (sound.id) }
+          <button
+            onclick={() => onChangeAudio(sound.id)}
+            class={`flex-none p-3 mb-2 ${trackNumber === sound.id ? 'bg-maree-darker-accent' : ''} hover:bg-maree-darker-accent active:bg-maree-darker-accent text-start text-xl text-maree-accent font-medium cursor-pointer rounded-xl`}
+          >
+            {sound.name}
+          </button>
+        {/each}
+      </div>
+    </div>
+    <div>
+      <h1 class="my-2 text-center text-5xl text-maree-secondary font-medium">المحاضرات</h1>
+      <div class="flex justify-center my-5">
+        <select class="py-5 px-10 text-2xl">
+          <option>العقيدة والتوحيد</option>
+        </select>
+      </div>
+      <p class="mb-10 text-maree-secondary text-3xl font-medium text-center">{track.name}</p>
+      <AudioPlayer src={track.src} {handleEnd} />
+    </div>
   </div>
-  <AudioPlayer />
-</div>
+</section>
