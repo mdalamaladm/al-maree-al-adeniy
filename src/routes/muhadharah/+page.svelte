@@ -1,5 +1,6 @@
 <script>
   import AudioPlayer from "$lib/AudioPlayer.svelte";
+	import Playlist from "$lib/Playlist.svelte";
 
   let showModal = $state(false);
   let search = $state('');
@@ -100,34 +101,10 @@
       onclick={onCloseModal}
       class="the-layout fixed w-full min-h-full p-10 inset-0 z-50 bg-gray-500/75 transition-opacity"
     >
-      <div class="h-full w-fit">
-        <div class="grid grid-cols-1 place-content-centerw-full sm:w-96 mb-3">
-          <input
-            class="col-span-1 p-2 bg-maree-accent text-xl text-maree-darker-accent font-medium rounded-xl"
-            type="text"
-            name="search"
-            id="search"
-            placeholder="ابحث"
-            bind:value={search}
-          >
-        </div>
-        <div class="flex flex-col h-[calc(100vh-160px)] w-full sm:w-96 p-5 bg-maree-dark-accent rounded-xl overflow-auto [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-maree-accent [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-maree-darker-accent [&::-webkit-scrollbar-thumb]:rounded-full">
-          {#each searchedPlaylist as sound (sound.id)}
-            <button
-              onclick={() => {
-                onChangeAudio(sound.id);
-                showModal = false;
-              }}
-              class={`flex-none p-3 mb-2 ${trackNumber === sound.id ? 'bg-maree-darker-accent' : ''} hover:bg-maree-darker-accent active:bg-maree-darker-accent text-start text-xl text-maree-accent font-medium cursor-pointer rounded-xl`}
-            >
-              {sound.name}
-            </button>
-          {/each}
-        </div>
-      </div>
+      <Playlist {onChangeAudio} {playlist} {trackNumber} class="h-full w-fit" />
     </div>
   {/if}
-	<div class="flex justify-between lg:justify-end">
+	<div class="flex justify-between lg:justify-start">
     <a href="/" class="m-5 text-maree-dark-accent">
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10">
 				<path d="M11.47 3.841a.75.75 0 0 1 1.06 0l8.69 8.69a.75.75 0 1 0 1.06-1.061l-8.689-8.69a2.25 2.25 0 0 0-3.182 0l-8.69 8.69a.75.75 0 1 0 1.061 1.06l8.69-8.689Z" />
@@ -144,28 +121,7 @@
 		</button>
 	</div>
   <div class="lg:flex lg:justify-center lg:items-stretch">
-    <div>
-      <div class="grid grid-cols-1 place-content-center mx-5 xl:mx-10 mb-3">
-        <input
-          class="hidden lg:inline col-span-1 p-2 bg-maree-accent text-xl text-maree-darker-accent font-medium rounded-xl"
-          type="text"
-          name="search"
-          id="search"
-          placeholder="ابحث"
-          bind:value={search}
-        >
-      </div>
-      <div class="flex-none hidden lg:flex flex-col h-[calc(100vh-200px)] w-72 lg:w-80 xl:w-[400px] mx-5 xl:mx-10 p-5 bg-maree-dark-accent rounded-xl overflow-auto [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-maree-accent [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-maree-darker-accent [&::-webkit-scrollbar-thumb]:rounded-full">
-        {#each searchedPlaylist as sound (sound.id) }
-          <button
-            onclick={() => onChangeAudio(sound.id)}
-            class={`flex-none p-3 mb-2 ${trackNumber === sound.id ? 'bg-maree-darker-accent' : ''} hover:bg-maree-darker-accent active:bg-maree-darker-accent text-start text-xl text-maree-accent font-medium cursor-pointer rounded-xl`}
-          >
-            {sound.name}
-          </button>
-        {/each}
-      </div>
-    </div>
+    <Playlist {onChangeAudio} {playlist} {trackNumber} class="hidden lg:block" listClass="min-h-[550px]" />
     <div>
       <h1 class="my-2 text-center text-5xl text-maree-secondary font-medium">المحاضرات</h1>
       <div class="flex justify-center my-5">
