@@ -1,5 +1,5 @@
 const names = {
-  muhadharah: 'المحاضرات',
+  muhadharat: 'المحاضرات',
   khuthab: 'الخطب',
   durus: 'الدروس',
   fatawa: 'الفتاوى',

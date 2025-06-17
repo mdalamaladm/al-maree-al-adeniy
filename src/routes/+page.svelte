@@ -2,7 +2,7 @@
   let navigations = [
     {
       name: 'المحاضرات',
-      href: '/audio/muhadharah',
+      href: '/audio/muhadharat',
     },
     {
       name: 'الخطب',
