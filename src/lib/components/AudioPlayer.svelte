@@ -54,6 +54,8 @@
     isPlay = false;
     resetAmplitudes();
 
+    const test = await fetch(`/api/audio/123`);
+    console.log('LIIINK', await test.text());
     const response = await fetch(`/audio${src}`);
     const audioContext = new AudioContext();
     const blob = await response.blob();
@@ -85,13 +87,11 @@
         sum = sum + Math.abs(rawData[blockStart + j]) // find the sum of all the samples in the block
       }
 
-      amplitudes[i] = (sum / blockSize * 6); // divide the sum by the block size to get the average
-
-      await sleep(100);
+      filteredData.push(sum / blockSize * 6); // divide the sum by the block size to get the average
     }
 
-    // const multiplier = Math.pow(Math.max(...filteredData), -1);
-    // amplitudes = filteredData.map(n => n * multiplier);
+    const multiplier = Math.pow(Math.max(...filteredData), -1);
+    amplitudes = filteredData.map(n => n * multiplier);
   }
 
   function resetAmplitudes () {
