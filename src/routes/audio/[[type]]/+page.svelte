@@ -3,10 +3,11 @@
 	import HomeIcon from "$lib/icons/HomeIcon.svelte";
 	import Playlist from "$lib/components/Playlist.svelte";
 	import PlaylistIcon from "$lib/icons/PlaylistIcon.svelte";
+	import Overlay from "$lib/components/Overlay.svelte";
 
   let { data } = $props();
 
-  let showModal = $state(false);
+  let open = $state(false);
   let playlist = $state([
     {
       id: 1,
@@ -78,6 +79,7 @@
 
   function onChangeAudio (id) {
     trackNumber = id;
+    open = false;
   }
 
   function handleEnd () {
@@ -87,13 +89,9 @@
       trackNumber++;
     }
   }
-
-  function onCloseModal (e) {
-    if (e.target.classList.contains('the-layout')) showModal = false;
-  }
   
   function onResize () {
-    showModal = false;
+    open = false;
   }
 </script>
 
@@ -109,37 +107,22 @@
     bg-maree-main
   "
 >
-  {#if showModal}
-    <div
-      onclick={onCloseModal}
+  <Overlay bind:open>
+    <Playlist
+      {onChangeAudio}
+      {playlist}
+      {trackNumber}
       class="
-        the-layout
-        fixed
+        h-full
         w-full
-        min-h-full
-        p-10
-        inset-0
-        z-50
-        bg-gray-500/75
-        transition-opacity
+        max-w-[400px]
       "
-    >
-      <Playlist
-        {onChangeAudio}
-        {playlist}
-        {trackNumber}
-        class="
-          h-full
-          w-full
-          max-w-[400px]
-        "
-        listClass="
-          w-full
-          max-w-[400px]
-        "
-      />
-    </div>
-  {/if}
+      listClass="
+        w-full
+        max-w-[400px]
+      "
+    />
+  </Overlay>
 	<div
     class="
       flex
@@ -157,7 +140,7 @@
 			<HomeIcon />
 		</a>
 		<button
-      onclick={() => showModal = true}
+      onclick={() => open = true}
       class="
         lg:hidden
         m-5
