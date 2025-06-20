@@ -1,5 +1,5 @@
 <script>
-  let { open = $bindable(false), children } = $props();
+  let { open = $bindable(false), center, children } = $props();
 
   function onCloseModal (e) {
     if (e.target.classList.contains('the-overlay')) open = false;
@@ -19,6 +19,7 @@
       z-50
       bg-gray-500/75
       transition-opacity
+      {center ? 'grid place-content-center' : ''}
     "
   >
   {@render children?.()}
