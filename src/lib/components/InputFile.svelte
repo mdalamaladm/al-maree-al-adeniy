@@ -1,0 +1,42 @@
+<script>
+	import AttachmentIcon from "$lib/icons/AttachmentIcon.svelte";
+
+  let { onInput, label } = $props();
+</script>
+<label
+  class="
+    w-full
+    mb-10
+  "
+>
+  <div
+    class="
+      grid
+      place-content-center
+      p-5
+    text-maree-darker-accent
+      border-3
+      border-dashed
+      border-maree-darker-accent
+      cursor-pointer
+    "
+  >
+    <AttachmentIcon
+      class="
+        size-15
+        justify-self-center
+      "
+    />
+    <p>{label}</p>
+  </div>
+  <input
+    onchange={onInput}
+    type="file"
+    accept="audio/*,video/*"
+    multiple
+    class="
+      invisible
+      absolute
+    "
+  >
+</label>
