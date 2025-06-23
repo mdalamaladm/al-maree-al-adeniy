@@ -1,4 +1,6 @@
 <script>
+	import InputText from "./input/InputText.svelte";
+
   let { class: className = '', listClass = '', onChangeAudio, playlist, trackNumber } = $props();
 
   let search = $state('');
@@ -19,22 +21,13 @@
       mb-3
     "
   >
-    <input
-      class="
-        col-span-1
-        p-2
-        bg-maree-accent
-        text-xl
-        text-maree-darker-accent
-        font-medium
-        rounded-xl
-      "
-      type="text"
-      name="search"
-      id="search"
+    <InputText
       placeholder="ابحث"
       bind:value={search}
-    >
+      class="
+        col-span-1
+      "
+    />
   </div>
   <div
     class={`
