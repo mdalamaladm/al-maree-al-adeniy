@@ -1,5 +1,5 @@
 <script>
-	import InputFile from "$lib/components/InputFile.svelte";
+	import InputFile from "$lib/components/input/InputFile.svelte";
   import Overlay from "$lib/components/Overlay.svelte";
 	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
@@ -131,72 +131,6 @@
     bg-maree-main
   "
 >
-  <Overlay
-    bind:open
-    center
-  >
-    <form
-      class="
-        w-96
-        h-96
-        p-10
-        bg-white
-        rounded-lg
-      "
-    >
-      <div>
-        <input
-          type="text"
-          placeholder="username"
-          class="
-            col-row-1
-            block
-            w-full
-            p-5
-            mb-10
-            text-maree-darker-accent
-            text-xl
-            border-3
-            border-solid
-            border-maree-darker-accent
-          "
-        >
-        <input
-          type="password"
-          placeholder="password"
-          class="
-            col-row-1
-            block
-            w-full
-            p-5
-            mb-10
-            text-maree-darker-accent
-            text-xl
-            border-3
-            border-solid
-            border-maree-darker-accent
-          "
-        >
-      </div>
-      <button
-        type="submit"
-        class="
-          grid
-          place-content-center
-          w-full
-          p-5
-          mb-10
-          bg-maree-secondary
-          text-maree-accent
-          text-xl
-          rounded-lg
-          cursor-pointer
-        "
-      >
-        Submit
-      </button>
-    </form>
-  </Overlay>
   <h1
     class="
       text-6xl
