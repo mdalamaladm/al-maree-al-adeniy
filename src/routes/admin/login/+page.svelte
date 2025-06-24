@@ -1,26 +1,9 @@
 <script>
+	import { enhance } from "$app/forms";
+	import { goto } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
 	import InputPassword from "$lib/components/input/InputPassword.svelte";
 	import InputText from "$lib/components/input/InputText.svelte";
-
-	let username = $state('');
-	let password = $state('');
-
-	async function onSubmit (e) {
-		e.preventDefault();
-		
-		const payload = { username, password };
-
-		const res = await fetch('/api/admin/auth', {
-			method: 'POST',
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(payload),
-		});
-
-		console.log('RES', await res.json());
-	}
 </script>
 
 <section
@@ -32,7 +15,8 @@
 	"
 >
 	<form
-		onsubmit={onSubmit}
+		method="POST"
+		use:enhance
 		class="
 			w-96
 			h-96
@@ -56,11 +40,11 @@
 		>
 			<InputText
 				label="الاسم المستخدم"
-				bind:value={username}
+				name="username"
 			/>
 			<InputPassword
 				label="كلمة المرور"
-				bind:value={password}
+				name="password"
 			/>
 		</div>
 		<Button

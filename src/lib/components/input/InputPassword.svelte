@@ -2,7 +2,7 @@
 	import EyeIcon from "$lib/icons/EyeIcon.svelte";
 	import EyeSlashIcon from "$lib/icons/EyeSlashIcon.svelte";
 
-  let { onInput = () => {}, value = $bindable(''), placeholder = null, label = null, class: className = '' } = $props();
+  let { onInput = () => {}, value = $bindable(''), placeholder = null, label = null, class: className = '', name } = $props();
 
   let show = $state(false);
 </script>
@@ -40,6 +40,7 @@
         rounded-xl
       "
       type={show ? 'text' : 'password'}
+      name={name}
       placeholder={placeholder}
       oninput={(e) => onInput(e)}
       bind:value

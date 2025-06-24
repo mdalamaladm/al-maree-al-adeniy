@@ -1,5 +1,5 @@
 <script>
-  let { onInput = () => {}, value = $bindable(''), placeholder = null, label = null, class: className = '' } = $props();
+  let { onInput = () => {}, value = $bindable(''), placeholder = null, label = null, class: className = '', name } = $props();
 </script>
 
 <label
@@ -29,6 +29,7 @@
       rounded-xl
     "
     type="text"
+    name={name}
     placeholder={placeholder}
     oninput={(e) => onInput(e)}
     bind:value
