@@ -55,7 +55,6 @@
     resetAmplitudes();
 
     const test = await fetch(`/api/audio/123`);
-    console.log('LIIINK', await test.text());
     const response = await fetch(`/audio${src}`);
     const audioContext = new AudioContext();
     const blob = await response.blob();
