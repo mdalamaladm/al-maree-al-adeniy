@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from "svelte";
-	import PlayButton from "$lib/components/PlayButton.svelte";
+	import PlayButton from "$lib/components/audio-player/PlayButton.svelte";
 
   let { src, handleEnd } = $props();
 

@@ -1,7 +1,7 @@
 <script>
-  import AudioPlayer from "$lib/components/AudioPlayer.svelte";
+  import AudioPlayer from "$lib/components/audio-player/AudioPlayer.svelte";
 	import HomeIcon from "$lib/icons/HomeIcon.svelte";
-	import Playlist from "$lib/components/Playlist.svelte";
+	import Playlist from "$lib/components/audio-player/Playlist.svelte";
 	import PlaylistIcon from "$lib/icons/PlaylistIcon.svelte";
 	import Overlay from "$lib/components/Overlay.svelte";
 
