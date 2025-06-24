@@ -18,7 +18,7 @@ export const actions = {
 
     const data = await res.json();
 
-    cookies.set('auth', data.access_token, { path: '', maxAge: 60 * 60 * 24 });
+    cookies.set('auth', data.access_token, { path: '/admin', maxAge: 60 * 60 });
 
     redirect(303, '/admin/manage');
   }
