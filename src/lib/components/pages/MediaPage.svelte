@@ -1,7 +1,7 @@
 <script>
 	import Table from "../Table.svelte";
 
-  let { files } = $props();
+  let { medias } = $props();
 
   let columns = [
     {
@@ -9,7 +9,7 @@
       key: 'name'
     },
     {
-      name: 'رقم الملف',
+      name: 'رقم الوسيطة',
       key: 'id'
     }
   ];
@@ -18,6 +18,6 @@
 <div>
   <Table
     {columns}
-    rows={files}
+    rows={medias}
   />
 </div>
