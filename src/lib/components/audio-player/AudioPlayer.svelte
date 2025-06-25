@@ -54,7 +54,6 @@
     isPlay = false;
     resetAmplitudes();
 
-    const test = await fetch(`/api/audio/123`);
     const response = await fetch(`/audio${src}`);
     const audioContext = new AudioContext();
     const blob = await response.blob();
