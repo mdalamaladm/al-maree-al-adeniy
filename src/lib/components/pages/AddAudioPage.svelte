@@ -4,12 +4,12 @@
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
 
   let typeValue = $state({
-    file: 1,
+    media: 1,
     type: 1,
     content: 1,
   })
 
-  let fileTypeOptions = [
+  let mediaTypeOptions = [
     {
       name: 'صوتبة',
       value: 1,
@@ -68,9 +68,9 @@
 
   let globalOptions = $derived([
     {
-      name: 'الملف',
-      type: 'file',
-      options: fileTypeOptions
+      name: 'الوسيطة',
+      type: 'media',
+      options: mediaTypeOptions
     },
     {
       name: 'النوع',
@@ -84,19 +84,19 @@
     }
   ])
 
-  let files = $state([]);
+  let medias = $state([]);
 
-  function onInputFile (e) {
-    const mapped = Array.from(e.target.files).map((f) => ({
+  function onInputMedia (e) {
+    const mapped = Array.from(e.target.medias).map((f) => ({
       meta: {
-        file: typeValue.file,
+        media: typeValue.media,
         type: typeValue.type,
         content: typeValue.content,
         options: [
           {
-            name: 'الملف',
-            type: 'file',
-            options: fileTypeOptions
+            name: 'الوسيطة',
+            type: 'media',
+            options: mediaTypeOptions
           },
           {
             name: 'النوع',
@@ -110,14 +110,14 @@
           }
         ],
       },
-      file: f
+      media: f
     }))
 
-    files.push(...mapped);
+    medias.push(...mapped);
   }
 
-  function onRemoveFile (i) {
-    files = files.filter((_, index) => index !== i);
+  function onRemoveMedia (i) {
+    medias = medias.filter((_, index) => index !== i);
   }
 </script>
 
@@ -183,7 +183,7 @@
                 (v) => {
                   typeValue[option.type] = v;
 
-                  if (option.type === 'file') {
+                  if (option.type === 'media') {
                     typeValue.type = 1;
                   } else if (option.type === 'type') {
                     typeValue.content = 1;
@@ -235,12 +235,12 @@
       "
     >
       <InputFile
-        onInput={onInputFile}
-        label="أدخل الملف"
+        onInput={onInputMedia}
+        label="أدخل الوسيطة"
       />
       <button
         onclick={() => open = true}
-        disabled={files.length < 1}
+        disabled={medias.length < 1}
         class="
           grid
           place-content-center
@@ -265,7 +265,7 @@
         gap-5
       "
     >
-      {#each files as file, i (i)}
+      {#each medias as media, i (i)}
         <div
           class="
             flex-[0_1_300px]
@@ -289,10 +289,10 @@
                 line-clamp-3
               "
             >
-              {file.file.name}
+              {media.media.name}
             </p>
             <CloseIcon
-              onclick={() => onRemoveFile(i)}
+              onclick={() => onRemoveMedia(i)}
               class="
                 size-8
                 flex-none
@@ -315,7 +315,7 @@
               gap-2
             "
           >
-            {#each file.meta.options as option (option.name)}
+            {#each media.meta.options as option (option.name)}
               <label
                 class="
                   row-span-1
@@ -328,18 +328,18 @@
                 >
                   <select
                     bind:value={
-                      () => file.meta[option.type],
+                      () => media.meta[option.type],
                       (v) => {
-                        file.meta[option.type] = v;
+                        media.meta[option.type] = v;
 
-                        if (option.type === 'file') {
-                          file.meta.type = 1;
+                        if (option.type === 'media') {
+                          media.meta.type = 1;
                         } else if (option.type === 'type') {
-                          file.meta.content = 1;
+                          media.meta.content = 1;
                           if (v === 3) {
-                            file.meta.options[2].options = lectureTypeOptions;
+                            media.meta.options[2].options = lectureTypeOptions;
                           } else {
-                            file.meta.options[2].options = otherTypeOptions;
+                            media.meta.options[2].options = otherTypeOptions;
                           }
                         }
                       }
