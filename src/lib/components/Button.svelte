@@ -1,5 +1,5 @@
 <script>
-  let { submit, type, color, size = 'medium', block = false, label = '', ...props } = $props();
+  let { submit = false, type, color, size = 'medium', block = false, label = '', ...props } = $props();
 
   let buttonStyle = $derived.by(() => {
     if (type === 'solid') {
