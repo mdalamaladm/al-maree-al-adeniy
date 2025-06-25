@@ -1,5 +1,5 @@
 <script>
-  let { submit = false, type, color, size = 'medium', block = false, label = '', ...props } = $props();
+  let { submit = false, type, color, size = 'medium', block = false, label = '', class: className = '', ...props } = $props();
 
   let buttonStyle = $derived.by(() => {
     if (type === 'solid') {
@@ -27,6 +27,7 @@
     {buttonStyle}
     rounded-lg
     cursor-pointer
+    {className}
   "
   {...props}
   type={submit ? 'submit' : 'button'}
