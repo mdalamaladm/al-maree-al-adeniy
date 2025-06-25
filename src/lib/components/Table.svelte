@@ -49,3 +49,22 @@
     {/each}
   </tbody>
 </table>
+{#if rows.length < 1}
+<div
+  class="
+    grid
+    place-content-center
+    w-full
+    h-64
+    bg-maree-accent
+    text-3xl
+    text-maree-dark-accent
+    border-[0.5px]
+    border-t-0
+    border-solid
+    border-maree-darker-accent
+  "
+>
+  <p>No Data</p>
+</div>
+{/if}
