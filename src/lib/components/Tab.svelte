@@ -1,14 +1,20 @@
 <script>
-  let { items = [] } = $props();
+  let { items = [], onchange = () => {} } = $props();
 
   let currentTab = $state(0);
+
+  function onClickTab(i) {
+    currentTab = i;
+
+    onchange(i);
+  }
 </script>
 
 <div>
   <div>
     {#each items as item, i (i)}
       <button
-        onclick={() => currentTab = i}
+        onclick={() => onClickTab(i)}
         class="
           px-5
           py-3
