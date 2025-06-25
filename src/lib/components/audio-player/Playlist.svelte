@@ -1,5 +1,5 @@
 <script>
-	import InputText from "./input/InputText.svelte";
+	import InputText from "../input/InputText.svelte";
 
   let { class: className = '', listClass = '', onChangeAudio, playlist, trackNumber } = $props();
 
