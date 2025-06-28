@@ -11,11 +11,26 @@
   let medias = $state([]);
   let types = $state([]);
   let contents = $state([]);
+  
+  let others = $derived.by(() => {
+    return contents.filter(c => !c.isLecture);
+  });
+  let lectures = $derived.by(() => {
+    return contents.filter(c => c.isLecture);
+  });
 
   let items = $derived([
     {
       name: 'الصوتية',
-      props: { audios },
+      props: {
+        audios,
+        options: {
+          medias: medias.map(m => ({ name: m.name, value: m.id, alias: m.alias })),
+          types: types.map(t => ({ name: t.name, value: t.id, alias: t.alias })),
+          others: others.map(o => ({ name: o.name, value: o.id })),
+          lectures: lectures.map(l => ({ name: l.name, value: l.id })),
+        }
+      },
       component: AudioPage
     },
     {
@@ -34,6 +49,12 @@
       component: ContentPage
     }
   ]);
+
+  async function loadAudios () {
+    const res = await fetch('/api/file');
+
+    audios = await res.json();
+  }
 
   async function loadMedias () {
     const res = await fetch('/api/media');
@@ -54,6 +75,7 @@
   }
 
   function onChangeTab(i) {
+    if (i === 0) loadAudios();
     if (i === 1) loadMedias();
     else if (i === 2) loadTypes();
     else if (i === 3) loadContents();
@@ -61,6 +83,9 @@
 
   $effect(() => {
     audios = data.audios;
+    medias = data.medias;
+    types = data.types;
+    contents = data.contents;
   });
 </script>
 

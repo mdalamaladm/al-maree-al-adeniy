@@ -3,7 +3,7 @@
 	import Table from "../Table.svelte";
 	import AddAudioPage from "./AddAudioPage.svelte";
 
-  let { audios } = $props();
+  let { audios, options } = $props();
 
   let isAddPage = $state(false);
 
@@ -36,17 +36,28 @@
 </script>
 
 {#if isAddPage}
-<AddAudioPage />
+  <AddAudioPage
+    {options}
+  />
 {:else}
-<div>
-  <Button
-    type="solid"
-    color="secondary"
-    label="الإضافة"
-  />
-  <Table
-    {columns}
-    rows={audios}
-  />
-</div>
+  <div>
+    <div
+      class="
+        flex
+        justify-end
+        mb-5
+      "
+    >
+      <Button
+        onclick={() => isAddPage = true}
+        type="solid"
+        color="secondary"
+        label="الإضافة"
+      />
+    </div>
+    <Table
+      {columns}
+      rows={audios}
+    />
+  </div>
 {/if}
