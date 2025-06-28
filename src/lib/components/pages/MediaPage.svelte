@@ -5,7 +5,7 @@
 
   let columns = [
     {
-      name: 'اسم اللف',
+      name: 'اسم الوسيطة',
       key: 'name'
     },
     {
