@@ -1,5 +1,6 @@
 <script>
 	import InputFile from "$lib/components/input/InputFile.svelte";
+	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
 	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
 
@@ -57,6 +58,11 @@
 
   let files = $state([]);
   let isUploading = $state(false);
+  let order = $state(0);
+
+  let isProgressing = $derived.by(() => {
+    return !!files.find(f => f.meta.status === 'progress');
+  })
 
   function setGlobalValue (v, option) {
     typeValue[option.type] = v;
@@ -124,79 +130,79 @@
     files.push(...mapped);
   }
 
-  function onClickClose (i, file) {
-    if (isUploading) {
-      onAbort(file);
-    } else {
-      onRemoveFile(i);
-    }
-  }
-
   function onRemoveFile (i) {
     files = files.filter((_, index) => index !== i);
   }
 
-  function onAbort (file) {
-    file.meta.xhr.abort();
-  }
-
   async function onUpload () {
     isUploading = true;
+  }
 
+  async function eachFileUpload(order, fileParam, uploadParam) {
+    console.log('NYAMBUNG?');
     const fiveMB = 5_000_000;
 
-    for (const file of files) {
-      const payload = {
-        key: `${mapMedias.get(file.meta.media)}/${mapTypes.get(file.meta.type)}/${file.file.name}`,
-        fileSize: file.file.size,
-      };
+    const file = fileParam || files[order];
+  
+    const payload = uploadParam || {
+      key: `${mapMedias.get(file.meta.media)}/${mapTypes.get(file.meta.type)}/${file.file.name}`,
+      fileSize: file.file.size,
+    };
+    
+    file.meta.upload = () => eachFileUpload(order, file, payload);
+    file.meta.status = 'wait';
 
+    if (!isProgressing) {
       const resUploadPresigned = await fetch(`/api/file/upload-presigned?key=${payload.key}`);
 
       const uploadPresigned = await resUploadPresigned.text();
 
+      console.log(uploadPresigned);
+
       await uploadXHR(uploadPresigned, file);
 
-      // const resUpload = await fetch(uploadPresigned, {
-      //   method: 'PUT',
-      //   body: file.file,
-      //   headers: {
-      //     'Content-Type': 'application/octet-stream'
-      //   }
-      // });
-
-      // console.log('HAI');
-
-      // console.log('UPLOAD', await resUpload.json());
-
-      // const resPresignedUrls = await fetch('/api/file/multipart-upload-presigned', {
-      //   method: 'POST',
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify(payload),
-      // });
-
-      // const presignedUrls = await resPresignedUrls.json();
-
-      // const numberOfParts = Math.ceil(file.file.size / fiveMB);
-
-      // const uploads = [];
-
-      // for (let i = 0; i < numberOfParts; i++) {
-      //   const start = i * fiveMB;
-      //   const end = Math.min(start + fiveMB, file.file.size);
-      //   const blob = file.file.slice(start, end);
-
-      //   console.log('BLOB', blob)
-
-      //   uploads.push(uploadPart(blob, presignedUrls[i], i + 1));
-      // }
-
-      // const uploadResponses = await Promise.all(uploads);
-
-      // console.log(`RESULT FOR ${file.file.name}`, uploadResponses);
+      orderIncrement();
     }
+
+    // const resUpload = await fetch(uploadPresigned, {
+    //   method: 'PUT',
+    //   body: file.file,
+    //   headers: {
+    //     'Content-Type': 'application/octet-stream'
+    //   }
+    // });
+
+    // console.log('HAI');
+
+    // console.log('UPLOAD', await resUpload.json());
+
+    // const resPresignedUrls = await fetch('/api/file/multipart-upload-presigned', {
+    //   method: 'POST',
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify(payload),
+    // });
+
+    // const presignedUrls = await resPresignedUrls.json();
+
+    // const numberOfParts = Math.ceil(file.file.size / fiveMB);
+
+    // const uploads = [];
+
+    // for (let i = 0; i < numberOfParts; i++) {
+    //   const start = i * fiveMB;
+    //   const end = Math.min(start + fiveMB, file.file.size);
+    //   const blob = file.file.slice(start, end);
+
+    //   console.log('BLOB', blob)
+
+    //   uploads.push(uploadPart(blob, presignedUrls[i], i + 1));
+    // }
+
+    // const uploadResponses = await Promise.all(uploads);
+
+    // console.log(`RESULT FOR ${file.file.name}`, uploadResponses);
   }
 
   async function uploadPart (fileChunk, presignedUrl, partNo) {
@@ -216,7 +222,8 @@
   function uploadXHR (url, file) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      file.meta.xhr = xhr
+      file.meta.xhr = xhr;
+
       
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
@@ -231,7 +238,7 @@
         if (xhr.status >= 200 && xhr.status < 300) {
           file.meta.status = 'complete';
           const response = JSON.parse(xhr.responseText);
-
+          
           resolve(response);
         } else {
           file.meta.status = 'error';
@@ -241,19 +248,48 @@
 
       xhr.addEventListener('error', () => {
         file.meta.status = 'error';
+        orderIncrement();
         reject(new Error('Network error occured'));
       });
 
       xhr.addEventListener('abort', () => {
         file.meta.status = 'abort';
+        orderIncrement();
         reject(new Error('Network aborted'));
       });
 
       xhr.open('PUT', url, true);
       xhr.send(file.file);
+      console.log('UPLOAD XHR');
+      return;
+
     })
   }
 
+  function orderIncrement() {
+    const index = files.findIndex(f => f.meta.status === 'wait');
+
+    console.log(index);
+
+    if (index > -1) {
+      order = index;
+    } else {
+      order = files.length;
+    }
+  }
+
+  $effect(() => {
+    if (isUploading) {
+      if (order < files.length) {
+        if (!isProgressing) {
+          console.log('ISUPLOADING', isUploading);
+          console.log('ORDER', order);
+          console.log('=====');
+          eachFileUpload(order);
+        }
+      }
+    }
+  });
 </script>
 
 
@@ -418,15 +454,17 @@
             >
               {file.file.name}
             </p>
-            <CloseIcon
-              onclick={() => onClickClose(i, file)}
-              class="
-                size-8
-                flex-none
-                mr-5
-                cursor-pointer
-              "
-            />
+            {#if !isUploading}
+              <CloseIcon
+                onclick={() => onRemoveFile(i)}
+                class="
+                  size-8
+                  flex-none
+                  mr-5
+                  cursor-pointer
+                "
+              />
+            {/if}
           </div>
           <div
             class="
@@ -508,86 +546,124 @@
               {/if}
             {/each}
             {#if isUploading}
-              {#if file.meta.status === 'wait'}
+              <div
+                class="
+                  flex
+                  items-center
+                  mt-2
+                "
+              >
                 <div
                   class="
-                    grid
-                    place-content-center
-                    h-10
-                    bg-gray-500
-                    text-xl
-                    rounded-xl
+                    flex-1
                   "
                 >
-                  Waiting...
+                  {#if file.meta.status === 'wait'}
+                    <div
+                      class="
+                        grid
+                        place-content-center
+                        h-10
+                        bg-gray-400
+                        text-xl
+                        rounded-xl
+                      "
+                    >
+                      Waiting...
+                    </div>
+                  {:else if file.meta.status === 'progress' || file.meta.status === 'complete'}
+                    <div
+                      class="
+                        relative
+                        h-10
+                        bg-gray-400
+                        text-xl
+                        rounded-xl
+                        overflow-hidden
+                      "
+                    >
+                      <div
+                        class="
+                          h-full
+                          bg-maree-secondary
+                        "
+                        style="
+                          width: calc({file.meta.progress}%)
+                        "
+                      >
+                      </div>
+                      <div
+                        class="
+                          grid
+                          place-content-center
+                          absolute
+                          top-0
+                          left-0
+                          w-full
+                          h-full
+                          text-maree-accent
+                        "
+                      >
+                        {#if file.meta.status === 'progress'}
+                          {file.meta.progress}%
+                        {:else}
+                          Uploaded
+                        {/if}
+                      </div>
+                    </div>
+                  {:else if file.meta.status === 'error'}
+                    <div
+                      class="
+                        grid
+                        place-content-center
+                        h-10
+                        bg-red-500
+                        text-xl
+                        rounded-xl
+                      "
+                    >
+                      Error
+                    </div>                
+                  {:else if file.meta.status === 'abort'}
+                    <div
+                      class="
+                        grid
+                        place-content-center
+                        h-10
+                        bg-gray-400
+                        text-xl
+                        rounded-xl
+                      "
+                    >
+                      Aborted
+                    </div>
+                  {/if}
                 </div>
-              {:else if file.meta.status === 'progress' || file.meta.status === 'complete'}
                 <div
                   class="
-                    relative
-                    h-10
-                    bg-gray-500
-                    text-xl
-                    rounded-xl
-                    overflow-hidden
+                    flex-none
+                    mr-5
                   "
                 >
-                  <div
-                    class="
-                      h-full
-                      bg-maree-secondary
-                    "
-                    style="
-                      width: calc({file.meta.progress}%)
-                    "
-                  >
-                  </div>
-                  <div
-                    class="
-                      grid
-                      place-content-center
-                      absolute
-                      top-0
-                      left-0
-                      w-full
-                      h-full
-                      text-maree-accent
-                    "
-                  >
-                    {#if file.meta.status === 'progress'}
-                      {file.meta.progress}%
-                    {:else}
-                      Uploaded
-                    {/if}
-                  </div>
+                  {#if file.meta.status === 'error' || file.meta.status === 'abort'}
+                    <ArrowPathIcon
+                      onclick={() => file.meta.upload()}
+                      class="
+                        size-8
+                        cursor-pointer
+                      "
+                    />
+                  {:else if file.meta.status === 'wait' || file.meta.status === 'progress'}
+                    <CloseIcon
+                      onclick={() => file.meta.xhr.abort()}
+                      class="
+                        size-8
+                        cursor-pointer
+                      "
+                    />
+                  {/if}
                 </div>
-              {:else if file.meta.status === 'error'}
-                <div
-                  class="
-                    grid
-                    place-content-center
-                    h-10
-                    bg-red-500
-                    text-xl
-                    rounded-xl
-                  "
-                >
-                  Error
-                </div>                
-              {:else if file.meta.status === 'abort'}
-                <div
-                  class="
-                    grid
-                    place-content-center
-                    h-10
-                    bg-gray-500
-                    text-xl
-                    rounded-xl
-                  "
-                >
-                  Aborted
-                </div>
-              {/if}
+              </div>
             {/if}
           </div>
         </div>
