@@ -1,5 +1,5 @@
 <script>
-  let { columns, rows } = $props();
+  let { columns, rows, slot = null } = $props();
 </script>
 
 <table
@@ -24,6 +24,9 @@
             border-[0.5px]
             border-maree-darker-accent
           "
+          style="
+            width: {column.width || 'auto'};
+          "
         >
           {column.name}
         </th>
@@ -34,15 +37,24 @@
     {#each rows as row, i (i)}
       <tr>
         {#each columns as column, j (j)}
-          <td
-            class="
-              p-5
-              border-solid
-              border-[0.5px]
-              border-maree-darker-accent
-            "
+        <td
+          class="
+            p-5
+            border-solid
+            border-[0.5px]
+          border-maree-darker-accent
+          "
+          
+          style="
+            width: {column.width || 'auto'};
+            text-align: {column.align || 'right'};
+          "
           >
-            {row[column.key]}
+            {#if column.slot}
+              {@render slot(column.slot, row)}
+            {:else}
+              {row[column.key]}
+            {/if}
           </td>
         {/each}
       </tr>
