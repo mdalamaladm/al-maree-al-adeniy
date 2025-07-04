@@ -1,8 +1,16 @@
 <script>
-  let { open = $bindable(false), center = false, children } = $props();
+  let {
+    open = $bindable(false),
+    center = false,
+    children,
+    onClose = () => {}
+  } = $props();
 
   function onCloseModal (e) {
-    if (e.target.classList.contains('the-overlay')) open = false;
+    if (e.target.classList.contains('the-overlay')) {
+      open = false;
+      onClose();
+    }
   }
 </script>
 
