@@ -30,6 +30,8 @@
     rounded-lg
     cursor-pointer
     {className}
+    disabled:bg-gray-400
+    disabled:text-white
   "
   {...props}
   type={submit ? 'submit' : 'button'}
