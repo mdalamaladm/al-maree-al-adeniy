@@ -35,17 +35,26 @@
     },
     {
       name: 'الوسيطة',
-      props: { medias },
+      props: { 
+        medias,
+        loadMedias,
+      },
       component: MediaPage
     },
     {
       name: 'النوع',
-      props: { types },
+      props: {
+        types,
+        loadTypes,
+      },
       component: TypePage
     },
     {
       name: 'الموضوع',
-      props: { contents },
+      props: {
+        contents,
+        loadContents
+      },
       component: ContentPage
     }
   ]);
