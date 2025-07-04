@@ -19,7 +19,6 @@
 		use:enhance
 		class="
 			w-96
-			h-96
 			p-10
 			bg-white
 			rounded-lg
@@ -41,6 +40,9 @@
 			<InputText
 				label="الاسم المستخدم"
 				name="username"
+				class="
+					mb-5
+				"
 			/>
 			<InputPassword
 				label="كلمة المرور"
