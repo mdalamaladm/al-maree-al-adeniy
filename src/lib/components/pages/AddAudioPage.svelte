@@ -3,6 +3,8 @@
 	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
 	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
+	import Button from "../Button.svelte";
+	import { modal } from "../modal.svelte";
 
   let { options } = $props();
 
@@ -59,10 +61,19 @@
   let files = $state([]);
   let isUploading = $state(false);
   let order = $state(0);
+  let dummyStatus = $state(false);
 
   let isProgressing = $derived.by(() => {
     return !!files.find(f => f.meta.status === 'progress');
   })
+
+  let filesReady = $derived.by(() => {
+    return files.filter(f => f.meta.status === 'ready');
+  });
+
+  let filesUpload = $derived.by(() => {
+    return files.filter(f => f.meta.status !== 'ready');
+  });
 
   function setGlobalValue (v, option) {
     typeValue[option.type] = v;
@@ -105,7 +116,7 @@
         content: typeValue.content,
         xhr: null,
         progress: 0,
-        status: 'wait',
+        status: 'ready',
         options: [
           {
             name: 'الوسيطة',
@@ -135,113 +146,90 @@
   }
 
   async function onUpload () {
+    files.forEach(f => {
+      if (f.meta.status === 'ready') {
+        f.meta.status = 'wait';
+      }
+    })
     isUploading = true;
+  }
+
+  let timeout = $state(null);
+
+  function delay (ms) {
+    return new Promise(resolve => timeout = setTimeout(resolve, ms));
+  }
+
+  async function dummyProgress (file) {
+    dummyStatus = true;
+    file.meta.status = 'progress';
+    file.meta.progress = 0;
+
+    while (dummyStatus && file.meta.progress < 100) {
+      await delay(500);
+
+      if (file.meta.progress + 5 < 100) {
+        file.meta.progress += 5;
+      } else {
+        file.meta.progress = 100;
+        file.meta.status = 'complete';
+      }
+
+    }
+  }
+
+  function dummyAbort (file) {
+    if (file.meta.status === 'progress') {
+      dummyStatus = false;
+      file.meta.status = 'abort';
+      clearTimeout(timeout);
+      orderIncrement();
+    } else {
+      file.meta.status = 'abort';
+    }
   }
 
   async function eachFileUpload(order, fileParam) {
     const file = fileParam || files[order];
 
     try {
-      const fiveMB = 5_000_000;
-
-      const key = `${mapMedias.get(file.meta.media)}/${mapTypes.get(file.meta.type)}/${file.file.name}`
+      // const key = `/${file.file.name}`
       
       file.meta.upload = () => eachFileUpload(order, file);
       file.meta.status = 'wait';
 
+      console.log(1);
+
       if (!isProgressing) {
-        const resUploadPresigned = await fetch(`/api/file/upload/presigned?${new URLSearchParams({ key })}`);
+        console.log(2);
+        await dummyProgress(file);
+        orderIncrement();
+        // const resUploadPresigned = await fetch(`/api/file/upload/presigned?${new URLSearchParams({ key })}`);
 
-        const uploadPresigned = await resUploadPresigned.text();
+        // const uploadPresigned = await resUploadPresigned.text();
 
-        await uploadXHR({
-          url: uploadPresigned,
-          file,
-          onProgress: (event) => {
-            file.meta.status = 'progress';
-            file.meta.progress = Math.round((event.loaded / event.total) * 100);
-          },
-          onSuccess: (xhr, resolve) => {
-            file.meta.status = 'complete';
-            orderIncrement();
-
-            resolve(null)
-          },
-          onError: () => {
-            file.meta.status = 'error';
-            orderIncrement();
-          },
-          onAbort: () => {
-            file.meta.status = 'abort';
-            orderIncrement();
-          }
-        });
-        // const resUploadId = await fetch(`/api/file/multipart-upload/upload-id?${new URLSearchParams({ key })}`);
-
-        // const uploadId = await resUploadId.text();
-
-        // console.log('UPLOAD ID', uploadId);
-
-        // const resPresignedUrls = await fetch(`/api/file/multipart-upload/presigned?${new URLSearchParams({ key, uploadId })}`, {
-        //   method: 'POST',
-        //   headers: {
-        //     "Content-Type": "application/json",
+        // await uploadXHR({
+        //   url: uploadPresigned,
+        //   file,
+        //   onProgress: (event) => {
+        //     file.meta.status = 'progress';
+        //     file.meta.progress = Math.round((event.loaded / event.total) * 100);
         //   },
-        //   body: JSON.stringify({
-        //     fileSize: file.file.size,
-        //   }),
-        // });
+        //   onSuccess: (xhr, resolve) => {
+        //     file.meta.status = 'complete';
+        //     orderIncrement();
 
-        // const presignedUrls = await resPresignedUrls.json();
-
-        // const numberOfParts = Math.ceil(file.file.size / fiveMB);
-
-        // const uploadResponses = [];
-
-        // try {
-        //   for (let i = 0; i < numberOfParts; i++) {
-        //     const start = i * fiveMB;
-        //     const end = Math.min(start + fiveMB, file.file.size);
-        //     const blob = file.file.slice(start, end);
-
-        //     uploadResponses.push(await
-        //       uploadPart({
-        //         file,
-        //         fileChunk: blob,
-        //         presignedUrl: presignedUrls[i],
-        //         partNo: i + 1,
-        //         numberOfParts,
-        //       }));
-        //   }
-        // } catch (error) {
-        //   if (error.message === 'Network error occured' || error.message.includes('HTTP error')) {
+        //     resolve(null)
+        //   },
+        //   onError: () => {
         //     file.meta.status = 'error';
-
-        //     return orderIncrement();
-        //   } else if (error.message === 'Network aborted') {
-        //     file.meta.status = 'abort';
-            
-        //     return orderIncrement();
-        //   }
-        // }
-
-        // const finalRes = await fetch(`/api/file/multipart-upload/complete`, {
-        //   method: 'POST',
-        //   headers: {
-        //     "Content-Type": "application/json",
+        //     orderIncrement();
         //   },
-        //   body: JSON.stringify(uploadResponses),
+        //   onAbort: () => {
+        //     file.meta.status = 'abort';
+        //     orderIncrement();
+        //   }
         // });
-
-        // if (finalRes.status >= 200 && finalRes.status < 300) {
-        //   file.meta.status = 'complete';
-          
-        //   orderIncrement();
-        // } else {
-        //   file.meta.status = 'error';
-          
-        //   orderIncrement();
-        // }
       }
     } catch(e) {
       console.error(e);
@@ -255,31 +243,6 @@
         orderIncrement();
       }
     }
-  }
-
-  async function uploadPart ({
-    file,
-    fileChunk,
-    presignedUrl,
-    partNo,
-    numberOfParts,
-  }) {
-    const eTag = await uploadXHR({
-      url: presignedUrl,
-      file: fileChunk,
-      onProgress: (event) => {
-        file.meta.status = 'progress';
-        file.meta.progress = Math.round((event.loaded / event.total) * 100) * (partNo / numberOfParts);
-      },
-      onSuccess: (xhr, resolve) => {
-        resolve(xhr.getResponseHeader('ETag'))
-      },
-    });
-
-    return {
-      ETag: eTag ?? '',
-      PartNumber: partNo
-    };
   }
 
   function uploadXHR ({
@@ -346,147 +309,15 @@
   });
 </script>
 
-
-
-<section>
-  <h1
-    class="
-      text-6xl
-      text-maree-secondary
-      text-center
-      font-medium
-    "
-  >
-    التحميل
-  </h1>
-  <div
-    class="
-      flex
-      flex-col
-      lg:flex-row
-      items-center
-      lg:justify-center
-      my-15
-    "
-  >
-    <div 
-      class="
-        lg:flex-[0_0_400px]
-        w-full
-        max-w-[400px]
-        grid
-        grid-rows-3
-        gap-5
-        lg:ml-10
-        mb-10
-        lg:mb-0
-      "
-    >
-      {#each globalOptions as option (option.name)}
-        <label
-          class="
-            row-span-1
-          "
-        >
-          <p
-            class="
-              mb-2
-              text-maree-secondary
-              font-medium
-            "
-          >
-            {option.name}
-          </p>
-          <div
-            class="
-              relative
-            "
-          >
-            <select
-              bind:value={
-                () => typeValue[option.type],
-                (v) => setGlobalValue(v, option)
-              }
-              class="
-                w-full
-                p-3
-                bg-maree-accent
-                text-xl
-                text-maree-darker-accent
-                rounded-xl
-                appearance-none
-              "
-            >
-              {#each option.options as type (type.value)}
-                <option value={type.value}>{type.name}</option>
-              {/each}
-            </select>
-            <div
-              class="
-                grid
-                place-content-center
-                absolute
-                top-0
-                left-0
-                h-full
-                w-12
-              "
-            >
-              <ChevronDownIcon
-                class="
-                  size-6
-                  text-maree-darker-accent
-                "
-              />
-            </div>
-          </div>
-        </label>
-      {/each}
-    </div>
-    <div
-      class="
-        lg:flex-[0_0_400px]
-        grid
-        w-full
-        max-w-[400px]
-      "
-    >
-      <InputFile
-        onInput={onInputMedia}
-        label="أدخل الوسيطة"
-      />
-      <button
-        onclick={onUpload}
-        disabled={files.length < 1}
-        class="
-          grid
-          place-content-center
-          p-5
-          bg-maree-secondary
-          text-maree-accent
-          text-xl
-          rounded-lg
-          cursor-pointer
-        "
-      >
-        التحميل
-      </button>
-    </div>
-  </div>
-  <div>
-    <div
-      class="
-        flex
-        flex-wrap
-        justify-center
-        gap-5
-      "
-    >
-      {#each files as file, i (i)}
+{#snippet uploadList(close)}
+  <div class="w-[500px] h-[500px] overflow-scroll">
+    <div>
+    {#each filesUpload as file, i (i)}
         <div
           class="
             flex-[0_1_300px]
             p-4
+            mb-5
             bg-maree-dark-accent
             text-maree-accent
             rounded-lg
@@ -498,6 +329,7 @@
               items-center
             "
           >
+            {JSON.stringify(file.meta.upload)}
             <p
               class="
                 h-[80px]
@@ -508,17 +340,6 @@
             >
               {file.file.name}
             </p>
-            {#if !isUploading}
-              <CloseIcon
-                onclick={() => onRemoveFile(i)}
-                class="
-                  size-8
-                  flex-none
-                  mr-5
-                  cursor-pointer
-                "
-              />
-            {/if}
           </div>
           <div
             class="
@@ -535,7 +356,6 @@
             "
           >
             {#each file.meta.options as option (option.name)}
-              {#if isUploading}
                 <div
                   class="
                     p-3
@@ -547,59 +367,7 @@
                 >
                   {option.options.find((o) => o.value === file.meta[option.type]).name}
                 </div>
-              {:else}
-                <label
-                  class="
-                    row-span-1
-                  "
-                >
-                  <div
-                    class="
-                      relative
-                    "
-                  >
-                    <select
-                      bind:value={
-                        () => file.meta[option.type],
-                        (v) => setEachFileValue(v, file, option)
-                      }
-                      class="
-                        w-full
-                        p-3
-                        bg-maree-accent
-                        text-xl
-                        text-maree-darker-accent
-                        rounded-xl
-                        appearance-none
-                      "
-                    >
-                      {#each option.options as type (type.value)}
-                        <option value={type.value}>{type.name}</option>
-                      {/each}
-                    </select>
-                    <div
-                      class="
-                        grid
-                        place-content-center
-                        absolute
-                        top-0
-                        left-0
-                        h-full
-                        w-12
-                      "
-                    >
-                      <ChevronDownIcon
-                        class="
-                          size-6
-                          text-maree-darker-accent
-                        "
-                      />
-                    </div>
-                  </div>
-                </label>
-              {/if}
             {/each}
-            {#if isUploading}
               <div
                 class="
                   flex
@@ -709,7 +477,10 @@
                     />
                   {:else if file.meta.status === 'wait' || file.meta.status === 'progress'}
                     <CloseIcon
-                      onclick={() => file.meta.xhr.abort()}
+                      onclick={() => {
+                        dummyAbort(file);
+                        // file.meta.xhr.abort();
+                      }}
                       class="
                         size-8
                         cursor-pointer
@@ -718,7 +489,255 @@
                   {/if}
                 </div>
               </div>
-            {/if}
+          </div>
+        </div>
+      {/each}
+  </div>
+  <div>
+    <Button
+      onclick={close}
+      type="solid"
+      color="secondary"
+      label="Close"
+    />
+  </div>
+  </div>
+{/snippet}
+
+<section>
+  <Button
+    onclick={() => modal.open(uploadList)}
+    type="solid"
+    color="secondary"
+    label="See List"
+  />
+  <h1
+    class="
+      text-6xl
+      text-maree-secondary
+      text-center
+      font-medium
+    "
+  >
+    التحميل
+  </h1>
+  <div
+    class="
+      flex
+      flex-col
+      lg:flex-row
+      items-center
+      lg:justify-center
+      my-15
+    "
+  >
+    <div 
+      class="
+        lg:flex-[0_0_400px]
+        w-full
+        max-w-[400px]
+        grid
+        grid-rows-3
+        gap-5
+        lg:ml-10
+        mb-10
+        lg:mb-0
+      "
+    >
+      {#each globalOptions as option (option.name)}
+        <label
+          class="
+            row-span-1
+          "
+        >
+          <p
+            class="
+              mb-2
+              text-maree-secondary
+              font-medium
+            "
+          >
+            {option.name}
+          </p>
+          <div
+            class="
+              relative
+            "
+          >
+            <select
+              bind:value={
+                () => typeValue[option.type],
+                (v) => setGlobalValue(v, option)
+              }
+              class="
+                w-full
+                p-3
+                bg-maree-accent
+                text-xl
+                text-maree-darker-accent
+                rounded-xl
+                appearance-none
+              "
+            >
+              {#each option.options as type (type.value)}
+                <option value={type.value}>{type.name}</option>
+              {/each}
+            </select>
+            <div
+              class="
+                grid
+                place-content-center
+                absolute
+                top-0
+                left-0
+                h-full
+                w-12
+              "
+            >
+              <ChevronDownIcon
+                class="
+                  size-6
+                  text-maree-darker-accent
+                "
+              />
+            </div>
+          </div>
+        </label>
+      {/each}
+    </div>
+    <div
+      class="
+        lg:flex-[0_0_400px]
+        grid
+        w-full
+        max-w-[400px]
+      "
+    >
+      <InputFile
+        onInput={onInputMedia}
+        label="أدخل الوسيطة"
+      />
+      <Button
+        onclick={onUpload}
+        type="solid"
+        color="secondary"
+        disabled={filesReady.length < 1}
+        label="التحميل"
+      />
+    </div>
+  </div>
+  <div>
+    <div
+      class="
+        flex
+        flex-wrap
+        justify-center
+        gap-5
+      "
+    >
+      {#each filesReady as file, i (i)}
+        <div
+          class="
+            flex-[0_1_300px]
+            p-4
+            bg-maree-dark-accent
+            text-maree-accent
+            rounded-lg
+          "
+        >
+          <div
+            class="
+              flex
+              items-center
+            "
+          >
+            {JSON.stringify(file.meta.upload)}
+            <p
+              class="
+                h-[80px]
+                text-xl
+                overflow-hidden
+                line-clamp-3
+              "
+            >
+              {file.file.name}
+            </p>
+            <CloseIcon
+              onclick={() => onRemoveFile(i)}
+              class="
+                size-8
+                flex-none
+                mr-5
+                cursor-pointer
+              "
+            />
+          </div>
+          <div
+            class="
+              h-[2px]
+              my-3
+              bg-maree-accent
+            "
+          ></div>
+          <div
+            class="
+              grid
+              grid-rows-3
+              gap-2
+            "
+          >
+            {#each file.meta.options as option (option.name)}
+
+                <label
+                  class="
+                    row-span-1
+                  "
+                >
+                  <div
+                    class="
+                      relative
+                    "
+                  >
+                    <select
+                      bind:value={
+                        () => file.meta[option.type],
+                        (v) => setEachFileValue(v, file, option)
+                      }
+                      class="
+                        w-full
+                        p-3
+                        bg-maree-accent
+                        text-xl
+                        text-maree-darker-accent
+                        rounded-xl
+                        appearance-none
+                      "
+                    >
+                      {#each option.options as type (type.value)}
+                        <option value={type.value}>{type.name}</option>
+                      {/each}
+                    </select>
+                    <div
+                      class="
+                        grid
+                        place-content-center
+                        absolute
+                        top-0
+                        left-0
+                        h-full
+                        w-12
+                      "
+                    >
+                      <ChevronDownIcon
+                        class="
+                          size-6
+                          text-maree-darker-accent
+                        "
+                      />
+                    </div>
+                  </div>
+                </label>
+            {/each}
           </div>
         </div>
       {/each}
