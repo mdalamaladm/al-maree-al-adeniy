@@ -4,6 +4,7 @@
 
 <label
   class="
+    block
     {className}
   "
 >
