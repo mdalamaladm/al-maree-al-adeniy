@@ -139,104 +139,119 @@
   }
 
   async function eachFileUpload(order, fileParam) {
-    const fiveMB = 5_000_000;
-
     const file = fileParam || files[order];
-    
-    const key = `${mapMedias.get(file.meta.media)}/${mapTypes.get(file.meta.type)}/${file.file.name}`
-    
-    file.meta.upload = () => eachFileUpload(order, file);
-    file.meta.status = 'wait';
 
-    if (!isProgressing) {
-      // const resUploadPresigned = await fetch(`/api/file/upload-presigned?key=${payload.key}`);
+    try {
+      const fiveMB = 5_000_000;
 
-      // const uploadPresigned = await resUploadPresigned.text();
+      const key = `${mapMedias.get(file.meta.media)}/${mapTypes.get(file.meta.type)}/${file.file.name}`
+      
+      file.meta.upload = () => eachFileUpload(order, file);
+      file.meta.status = 'wait';
 
-      // await uploadXHR({
-      //   url: uploadPresigned,
-      //   file,
-      //   onProgress: (event) => {
-      //     file.meta.status = 'progress';
-      //     file.meta.progress = Math.round((event.loaded / event.total) * 100);
-      //   },
-      //   onSuccess: (xhr, resolve) => {
-      //     file.meta.status = 'complete';
-      //     orderIncrement();
+      if (!isProgressing) {
+        const resUploadPresigned = await fetch(`/api/file/upload/presigned?${new URLSearchParams({ key })}`);
 
-      //     resolve(null)
-      //   },
-      //   onError: () => {
-      //     file.meta.status = 'error';
-      //     orderIncrement();
-      //   },
-      //   onAbort: () => {
-      //     file.meta.status = 'abort';
-      //     orderIncrement();
-      //   }
-      // });
-      const resUploadId = await fetch(`/api/file/multipart-upload/upload-id/${key}`);
+        const uploadPresigned = await resUploadPresigned.text();
 
-      const uploadId = await resUploadId.text();
+        await uploadXHR({
+          url: uploadPresigned,
+          file,
+          onProgress: (event) => {
+            file.meta.status = 'progress';
+            file.meta.progress = Math.round((event.loaded / event.total) * 100);
+          },
+          onSuccess: (xhr, resolve) => {
+            file.meta.status = 'complete';
+            orderIncrement();
 
-      const resPresignedUrls = await fetch(`/api/file/multipart-upload/presigned/${key}/${uploadId}`, {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          fileSize: file.file.size,
-        }),
-      });
+            resolve(null)
+          },
+          onError: () => {
+            file.meta.status = 'error';
+            orderIncrement();
+          },
+          onAbort: () => {
+            file.meta.status = 'abort';
+            orderIncrement();
+          }
+        });
+        // const resUploadId = await fetch(`/api/file/multipart-upload/upload-id?${new URLSearchParams({ key })}`);
 
-      const presignedUrls = await resPresignedUrls.json();
+        // const uploadId = await resUploadId.text();
 
-      const numberOfParts = Math.ceil(file.file.size / fiveMB);
+        // console.log('UPLOAD ID', uploadId);
 
-      const uploadResponses = [];
+        // const resPresignedUrls = await fetch(`/api/file/multipart-upload/presigned?${new URLSearchParams({ key, uploadId })}`, {
+        //   method: 'POST',
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({
+        //     fileSize: file.file.size,
+        //   }),
+        // });
 
-      try {
-        for (let i = 0; i < numberOfParts; i++) {
-          const start = i * fiveMB;
-          const end = Math.min(start + fiveMB, file.file.size);
-          const blob = file.file.slice(start, end);
+        // const presignedUrls = await resPresignedUrls.json();
 
-          uploadResponses.push(await
-            uploadPart({
-              file,
-              fileChunk: blob,
-              presignedUrl: presignedUrls[i],
-              partNo: i + 1,
-              numberOfParts,
-            }));
-        }
-      } catch (error) {
-        if (error.message === 'Network error occured' || error.message.includes('HTTP error')) {
-          file.meta.status = 'error';
+        // const numberOfParts = Math.ceil(file.file.size / fiveMB);
 
-          return orderIncrement();
-        } else if (error.message === 'Network aborted') {
-          file.meta.status = 'abort';
+        // const uploadResponses = [];
+
+        // try {
+        //   for (let i = 0; i < numberOfParts; i++) {
+        //     const start = i * fiveMB;
+        //     const end = Math.min(start + fiveMB, file.file.size);
+        //     const blob = file.file.slice(start, end);
+
+        //     uploadResponses.push(await
+        //       uploadPart({
+        //         file,
+        //         fileChunk: blob,
+        //         presignedUrl: presignedUrls[i],
+        //         partNo: i + 1,
+        //         numberOfParts,
+        //       }));
+        //   }
+        // } catch (error) {
+        //   if (error.message === 'Network error occured' || error.message.includes('HTTP error')) {
+        //     file.meta.status = 'error';
+
+        //     return orderIncrement();
+        //   } else if (error.message === 'Network aborted') {
+        //     file.meta.status = 'abort';
+            
+        //     return orderIncrement();
+        //   }
+        // }
+
+        // const finalRes = await fetch(`/api/file/multipart-upload/complete`, {
+        //   method: 'POST',
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify(uploadResponses),
+        // });
+
+        // if (finalRes.status >= 200 && finalRes.status < 300) {
+        //   file.meta.status = 'complete';
           
-          return orderIncrement();
-        }
+        //   orderIncrement();
+        // } else {
+        //   file.meta.status = 'error';
+          
+        //   orderIncrement();
+        // }
       }
+    } catch(e) {
+      console.error(e);
 
-      const finalRes = await fetch(`/api/file/multipart-upload/complete`, {
-        method: 'POST',
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(uploadResponses),
-      });
-
-      if (finalRes.status >= 200 && finalRes.status < 300) {
-        file.meta.status = 'complete';
-        
-        orderIncrement();
-      } else {
+      if (
+        e.message !== 'Network error occured' &&
+        !e.message.includes('HTTP error') &&
+        e.message !== 'Network aborted'
+      ) {
         file.meta.status = 'error';
-        
         orderIncrement();
       }
     }
