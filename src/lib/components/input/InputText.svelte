@@ -1,5 +1,12 @@
 <script>
-  let { onInput = () => {}, value = $bindable(''), placeholder = null, label = null, class: className = '', name } = $props();
+  let {
+    onInput = () => {},
+    value = $bindable(''),
+    placeholder = null,
+    label = null,
+    name = 'text',
+    class: className = '',
+  } = $props();
 </script>
 
 <label
@@ -25,7 +32,6 @@
       p-2
       bg-maree-accent
       text-xl
-      text-maree-darker-accent
       font-medium
       rounded-xl
     "

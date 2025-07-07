@@ -35,7 +35,6 @@
         pl-13
         bg-maree-accent
         text-xl
-        text-maree-darker-accent
         font-medium
         rounded-xl
       "
