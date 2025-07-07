@@ -116,7 +116,7 @@
     rows={contents}
   >
     {#snippet slot(name, data)}
-      {#if name === 'action'}
+      {#if name === 'action' && data.id !== 1}
         <div
           class="
             flex

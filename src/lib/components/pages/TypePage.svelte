@@ -103,7 +103,7 @@
     rows={types}
   >
     {#snippet slot(name, data)}
-      {#if name === 'action'}
+      {#if name === 'action' && !(data.id === 1 || data.id === 2 || data.id === 3 || data.id === 4 || data.id === 5)}
         <div
           class="
             flex
