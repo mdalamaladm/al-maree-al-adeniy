@@ -1,5 +1,5 @@
 <script>
-  let{ checked = $bindable(false), label } = $props();
+  let{ checked = $bindable(false), label, name = 'checkbox', class: className = '' } = $props();
 </script>
 
 <label
@@ -9,10 +9,12 @@
     mr-2
     text-maree-secondary
     font-medium
+    {className}
   "
 >
   <input
     type="checkbox"
+    {name}
     bind:checked
     class="
       w-5
