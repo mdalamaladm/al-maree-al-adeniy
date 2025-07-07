@@ -1,6 +1,7 @@
 <script>
 	import Button from "./Button.svelte";
 	import InputCheckbox from "./input/InputCheckbox.svelte";
+	import InputSelect from "./input/InputSelect.svelte";
 	import InputText from "./input/InputText.svelte";
   import { modal } from "./modal.svelte";
 	import Overlay from "./Overlay.svelte";
@@ -61,13 +62,29 @@
         {#if input.type === 'checkbox'}
           <InputCheckbox
             label={input.label}
+            name={input.name}
             bind:checked={input.value}
+            class="
+              mb-5
+            "
           />
-        {:else if input.type == 'text'}
+        {:else if input.type === 'text'}
           <InputText
             label={input.label}
             name={input.name}
             bind:value={input.value}
+            class="
+              mb-5
+            "
+          />
+        {:else if input.type === 'select'}
+          <InputSelect
+            label={input.label}
+            name={input.name}
+            options={input.options}
+            bind:value={input.value}
+            getter={input.getter}
+            setter={input.setter}
             class="
               mb-5
             "
@@ -148,16 +165,12 @@
 
 {#snippet base(id, content, props)}
   <Overlay
-    center
+    center={props?.center === false ? false : true}
     open
     onClose={() => modal.close(id)}
   >
     <div
-      class="
-        p-5
-        bg-white
-        rounded-lg
-      "
+      class="{props?.className || 'p-5 bg-white rounded-lg'}"
     >
       {@render content(() => modal.close(id), props)}
     </div>
