@@ -24,11 +24,12 @@
       name: 'الصوتية',
       props: {
         audios,
+        loadAudios,
         options: {
-          medias: medias.map(m => ({ name: m.name, value: m.id, alias: m.alias })),
-          types: types.map(t => ({ name: t.name, value: t.id, alias: t.alias })),
-          others: others.map(o => ({ name: o.name, value: o.id })),
-          lectures: lectures.map(l => ({ name: l.name, value: l.id })),
+          medias: medias.map(e => ({ name: e.name, value: e.id })),
+          types: types.map(e => ({ name: e.name, value: e.id })),
+          others: others.map(e => ({ name: e.name, value: e.id })),
+          lectures: lectures.map(e => ({ name: e.name, value: e.id })),
         }
       },
       component: AudioPage

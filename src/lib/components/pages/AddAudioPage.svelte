@@ -4,6 +4,7 @@
 	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
 	import Button from "../Button.svelte";
+	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 
   let { options } = $props();
@@ -12,10 +13,12 @@
     media: undefined,
     type: undefined,
     content: undefined,
-  })
+  });
 
-  let contentTypeOptions = $derived.by(() => {
-    if (typeValue.type === 3) return options.lectures;
+  let uploadListButtonClass = $state('');
+
+  let contentOptions = $derived.by(() => {
+    if (typeValue.type === 4) return options.lectures;
     else return options.others;
   });
 
@@ -33,35 +36,13 @@
     {
       name: 'الموضوع',
       type: 'content',
-      options: contentTypeOptions
+      options: contentOptions
     }
   ]);
-
-  let mapMedias = $derived.by(() => {
-    const map = new Map();
-
-    for (const media of options.medias) {
-      map.set(media.value, media.alias);
-    }
-
-    return map;
-  });
-
-  let mapTypes = $derived.by(() => {
-    const map = new Map();
-
-    for (const type of options.types) {
-      map.set(type.value, type.alias);
-    }
-
-    return map;
-  });
-
 
   let files = $state([]);
   let isUploading = $state(false);
   let order = $state(0);
-  let dummyStatus = $state(false);
 
   let isProgressing = $derived.by(() => {
     return !!files.find(f => f.meta.status === 'progress');
@@ -82,7 +63,7 @@
       typeValue.type = options.types[0].value;
       typeValue.content = options.others[0].value;
     } else if (option.type === 'type') {
-      if (v === 3) {
+      if (v === 4) {
         typeValue.content = options.lectures[0].value;
       } else {
         typeValue.content = options.others[0].value;
@@ -98,7 +79,7 @@
       file.meta.options[2].options = options.others;
       file.meta.content = options.others[0].value;
     } else if (option.type === 'type') {
-      if (v === 3) {
+      if (v === 4) {
         file.meta.options[2].options = options.lectures;
         file.meta.content = options.lectures[0].value;
       } else {
@@ -150,98 +131,67 @@
       if (f.meta.status === 'ready') {
         f.meta.status = 'wait';
       }
-    })
+    });
+
+    uploadListButtonClass = 'animate-pulse';
+    setTimeout(() => uploadListButtonClass = '', 2000);
+
     isUploading = true;
   }
 
-  let timeout = $state(null);
-
-  function delay (ms) {
-    return new Promise(resolve => timeout = setTimeout(resolve, ms));
-  }
-
-  async function dummyProgress (file) {
-    dummyStatus = true;
-    file.meta.status = 'progress';
-    file.meta.progress = 0;
-
-    while (dummyStatus && file.meta.progress < 100) {
-      await delay(500);
-
-      if (file.meta.progress + 5 < 100) {
-        file.meta.progress += 5;
-      } else {
-        file.meta.progress = 100;
-        file.meta.status = 'complete';
-      }
-
-    }
-  }
-
-  function dummyAbort (file) {
-    if (file.meta.status === 'progress') {
-      dummyStatus = false;
-      file.meta.status = 'abort';
-      clearTimeout(timeout);
-      orderIncrement();
-    } else {
-      file.meta.status = 'abort';
-    }
-  }
-
-  async function eachFileUpload(order, fileParam) {
+  async function eachFileUpload(fileParam) {
     const file = fileParam || files[order];
 
     try {
-      // const key = `/${file.file.name}`
-      
-      file.meta.upload = () => eachFileUpload(order, file);
+      file.meta.upload = () => eachFileUpload(file);
       file.meta.status = 'wait';
 
-      console.log(1);
-
       if (!isProgressing) {
-        console.log(2);
-        await dummyProgress(file);
+        const resUploadPresigned = await fetch(`/api/file/upload/presigned`);
+
+        const { key, presigned } = await resUploadPresigned.json();
+
+        await uploadXHR({
+          url: presigned,
+          file,
+          onProgress: (event) => {
+            file.meta.status = 'progress';
+            file.meta.progress = Math.round((event.loaded / event.total) * 100);
+          },
+          onError: () => {
+            file.meta.status = 'error';
+            orderIncrement();
+          },
+          onAbort: () => {
+            file.meta.status = 'abort';
+            orderIncrement();
+          }
+        });
+
+        const payload = {
+          name: file.file.name,
+          key,
+          mediaId: file.meta.media,
+          typeId: file.meta.type,
+          contentId: file.meta.content,
+        };
+
+        await fetch('/api/file', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        file.meta.status = 'complete';
         orderIncrement();
-        // const resUploadPresigned = await fetch(`/api/file/upload/presigned?${new URLSearchParams({ key })}`);
-
-        // const uploadPresigned = await resUploadPresigned.text();
-
-        // await uploadXHR({
-        //   url: uploadPresigned,
-        //   file,
-        //   onProgress: (event) => {
-        //     file.meta.status = 'progress';
-        //     file.meta.progress = Math.round((event.loaded / event.total) * 100);
-        //   },
-        //   onSuccess: (xhr, resolve) => {
-        //     file.meta.status = 'complete';
-        //     orderIncrement();
-
-        //     resolve(null)
-        //   },
-        //   onError: () => {
-        //     file.meta.status = 'error';
-        //     orderIncrement();
-        //   },
-        //   onAbort: () => {
-        //     file.meta.status = 'abort';
-        //     orderIncrement();
-        //   }
-        // });
       }
     } catch(e) {
       console.error(e);
 
-      if (
-        e.message !== 'Network error occured' &&
-        !e.message.includes('HTTP error') &&
-        e.message !== 'Network aborted'
-      ) {
-        file.meta.status = 'error';
-        orderIncrement();
-      }
+      file.meta.status = 'error';
+      orderIncrement();
     }
   }
 
@@ -249,7 +199,7 @@
     url,
     file,
     onProgress = () => {},
-    onSuccess = () => {},
+    onSuccess = (_, resolve) => resolve(),
     onError = () => {},
     onAbort = () => {}
   }) {
@@ -298,6 +248,17 @@
     }
   }
 
+  function formattedFilename (name) {
+    const splitted = name.split('.');
+    const extension = splitted.pop();
+    let filename = splitted.join('.');
+
+    if (filename.length > 50) {
+      filename = `${filename.slice(0, 50)}...`
+    }
+    return `${filename}.${extension}`
+  }
+
   $effect(() => {
     if (isUploading) {
       if (order < files.length) {
@@ -310,206 +271,221 @@
 </script>
 
 {#snippet uploadList(close)}
-  <div class="w-[500px] h-[500px] overflow-scroll">
-    <div>
-    {#each filesUpload as file, i (i)}
-        <div
-          class="
-            flex-[0_1_300px]
-            p-4
-            mb-5
-            bg-maree-dark-accent
-            text-maree-accent
-            rounded-lg
-          "
-        >
+  <div
+    class="
+      h-full
+    "
+  >
+    <div
+      class="
+        p-5
+      "
+    >
+      <Button
+        onclick={close}
+        type="solid"
+        color="secondary"
+        label="Close"
+      />
+    </div>
+    <div
+      class="
+        flex
+        flex-wrap
+        items-start
+        justify-center
+        gap-5
+        h-[calc(100%_-_112px)]
+        overflow-y-auto
+      "
+    >
+      {#each filesUpload as file, i (i)}
           <div
             class="
-              flex
-              items-center
+              flex-[0_1_300px]
+              p-4
+              bg-maree-dark-accent
+              text-maree-accent
+              rounded-lg
             "
           >
-            {JSON.stringify(file.meta.upload)}
-            <p
+            <div
               class="
-                h-[80px]
-                text-xl
-                overflow-hidden
-                line-clamp-3
+                flex
+                items-center
               "
             >
-              {file.file.name}
-            </p>
-          </div>
-          <div
-            class="
-              h-[2px]
-              my-3
-              bg-maree-accent
-            "
-          ></div>
-          <div
-            class="
-              grid
-              grid-rows-3
-              gap-2
-            "
-          >
-            {#each file.meta.options as option (option.name)}
+              <p
+                class="
+                  h-[60px]
+                  text-xl
+                "
+              >
+                {formattedFilename(file.file.name)}
+              </p>
+            </div>
+            <div
+              class="
+                h-[2px]
+                my-3
+                bg-maree-accent
+              "
+            ></div>
+            <div
+              class="
+                grid
+                grid-rows-3
+                gap-2
+              "
+            >
+              {#each file.meta.options as option (option.name)}
                 <div
                   class="
-                    p-3
+                    row-span-1
+                    p-2
                     bg-maree-accent
-                    text-xl
+                    text-lg
                     text-maree-darker-accent
                     rounded-xl
                   "
                 >
                   {option.options.find((o) => o.value === file.meta[option.type]).name}
                 </div>
-            {/each}
+              {/each}
+              </div>
+            <div
+              class="
+                flex
+                items-center
+                mt-2
+              "
+            >
               <div
                 class="
-                  flex
-                  items-center
-                  mt-2
+                  flex-1
                 "
               >
-                <div
-                  class="
-                    flex-1
-                  "
-                >
-                  {#if file.meta.status === 'wait'}
+                {#if file.meta.status === 'wait'}
+                  <div
+                    class="
+                      grid
+                      place-content-center
+                      h-10
+                      bg-gray-400
+                      text-xl
+                      rounded-xl
+                    "
+                  >
+                    Waiting...
+                  </div>
+                {:else if file.meta.status === 'progress' || file.meta.status === 'complete'}
+                  <div
+                    class="
+                      relative
+                      h-10
+                      bg-gray-400
+                      text-xl
+                      rounded-xl
+                      overflow-hidden
+                    "
+                  >
+                    <div
+                      class="
+                        h-full
+                        bg-maree-secondary
+                      "
+                      style="
+                        width: calc({file.meta.progress}%)
+                      "
+                    >
+                    </div>
                     <div
                       class="
                         grid
                         place-content-center
-                        h-10
-                        bg-gray-400
-                        text-xl
-                        rounded-xl
+                        absolute
+                        top-0
+                        left-0
+                        w-full
+                        h-full
+                        text-maree-accent
                       "
                     >
-                      Waiting...
+                      {#if file.meta.status === 'progress'}
+                        {file.meta.progress}%
+                      {:else}
+                        Uploaded
+                      {/if}
                     </div>
-                  {:else if file.meta.status === 'progress' || file.meta.status === 'complete'}
-                    <div
-                      class="
-                        relative
-                        h-10
-                        bg-gray-400
-                        text-xl
-                        rounded-xl
-                        overflow-hidden
-                      "
-                    >
-                      <div
-                        class="
-                          h-full
-                          bg-maree-secondary
-                        "
-                        style="
-                          width: calc({file.meta.progress}%)
-                        "
-                      >
-                      </div>
-                      <div
-                        class="
-                          grid
-                          place-content-center
-                          absolute
-                          top-0
-                          left-0
-                          w-full
-                          h-full
-                          text-maree-accent
-                        "
-                      >
-                        {#if file.meta.status === 'progress'}
-                          {file.meta.progress}%
-                        {:else}
-                          Uploaded
-                        {/if}
-                      </div>
-                    </div>
-                  {:else if file.meta.status === 'error'}
-                    <div
-                      class="
-                        grid
-                        place-content-center
-                        h-10
-                        bg-red-500
-                        text-xl
-                        rounded-xl
-                      "
-                    >
-                      Error
-                    </div>                
-                  {:else if file.meta.status === 'abort'}
-                    <div
-                      class="
-                        grid
-                        place-content-center
-                        h-10
-                        bg-gray-400
-                        text-xl
-                        rounded-xl
-                      "
-                    >
-                      Aborted
-                    </div>
-                  {/if}
-                </div>
-                <div
-                  class="
-                    flex-none
-                    mr-5
-                  "
-                >
-                  {#if file.meta.status === 'error' || file.meta.status === 'abort'}
-                    <ArrowPathIcon
-                      onclick={() => file.meta.upload()}
-                      class="
-                        size-8
-                        cursor-pointer
-                      "
-                    />
-                  {:else if file.meta.status === 'wait' || file.meta.status === 'progress'}
-                    <CloseIcon
-                      onclick={() => {
-                        dummyAbort(file);
-                        // file.meta.xhr.abort();
-                      }}
-                      class="
-                        size-8
-                        cursor-pointer
-                      "
-                    />
-                  {/if}
-                </div>
+                  </div>
+                {:else if file.meta.status === 'error'}
+                  <div
+                    class="
+                      grid
+                      place-content-center
+                      h-10
+                      bg-red-500
+                      text-xl
+                      rounded-xl
+                    "
+                  >
+                    Error
+                  </div>                
+                {:else if file.meta.status === 'abort'}
+                  <div
+                    class="
+                      grid
+                      place-content-center
+                      h-10
+                      bg-gray-400
+                      text-xl
+                      rounded-xl
+                    "
+                  >
+                    Aborted
+                  </div>
+                {/if}
               </div>
+              <div
+                class="
+                  flex-none
+                  mr-5
+                "
+              >
+                {#if file.meta.status === 'error' || file.meta.status === 'abort'}
+                  <ArrowPathIcon
+                    onclick={() => file.meta.upload()}
+                    class="
+                      size-8
+                      cursor-pointer
+                    "
+                  />
+                {:else if file.meta.status === 'wait' || file.meta.status === 'progress'}
+                  <CloseIcon
+                    onclick={() => {
+                      file.meta.xhr.abort();
+                    }}
+                    class="
+                      size-8
+                      cursor-pointer
+                    "
+                  />
+                {/if}
+              </div>
+            </div>
           </div>
-        </div>
-      {/each}
-  </div>
-  <div>
-    <Button
-      onclick={close}
-      type="solid"
-      color="secondary"
-      label="Close"
-    />
-  </div>
+        {/each}
+    </div>
   </div>
 {/snippet}
 
 <section>
   <Button
-    onclick={() => modal.open(uploadList)}
+    onclick={() => modal.open(uploadList, { center: false, className: 'w-full h-full bg-white' })}
     type="solid"
     color="secondary"
     label="See List"
+    class={uploadListButtonClass}
   />
   <h1
     class="
@@ -545,64 +521,15 @@
       "
     >
       {#each globalOptions as option (option.name)}
-        <label
+        <InputSelect
+          label={option.name}
+          options={option.options}
+          getter={() => typeValue[option.type]}
+          setter={(v) => setGlobalValue(v, option)}
           class="
             row-span-1
           "
-        >
-          <p
-            class="
-              mb-2
-              text-maree-secondary
-              font-medium
-            "
-          >
-            {option.name}
-          </p>
-          <div
-            class="
-              relative
-            "
-          >
-            <select
-              bind:value={
-                () => typeValue[option.type],
-                (v) => setGlobalValue(v, option)
-              }
-              class="
-                w-full
-                p-3
-                bg-maree-accent
-                text-xl
-                text-maree-darker-accent
-                rounded-xl
-                appearance-none
-              "
-            >
-              {#each option.options as type (type.value)}
-                <option value={type.value}>{type.name}</option>
-              {/each}
-            </select>
-            <div
-              class="
-                grid
-                place-content-center
-                absolute
-                top-0
-                left-0
-                h-full
-                w-12
-              "
-            >
-              <ChevronDownIcon
-                class="
-                  size-6
-                  text-maree-darker-accent
-                "
-              />
-            </div>
-          </div>
-        </label>
+        />
       {/each}
     </div>
     <div
@@ -651,16 +578,13 @@
               items-center
             "
           >
-            {JSON.stringify(file.meta.upload)}
             <p
               class="
                 h-[80px]
                 text-xl
-                overflow-hidden
-                line-clamp-3
               "
             >
-              {file.file.name}
+              {formattedFilename(file.file.name)}
             </p>
             <CloseIcon
               onclick={() => onRemoveFile(i)}
@@ -687,56 +611,14 @@
             "
           >
             {#each file.meta.options as option (option.name)}
-
-                <label
-                  class="
-                    row-span-1
-                  "
-                >
-                  <div
-                    class="
-                      relative
-                    "
-                  >
-                    <select
-                      bind:value={
-                        () => file.meta[option.type],
-                        (v) => setEachFileValue(v, file, option)
-                      }
-                      class="
-                        w-full
-                        p-3
-                        bg-maree-accent
-                        text-xl
-                        text-maree-darker-accent
-                        rounded-xl
-                        appearance-none
-                      "
-                    >
-                      {#each option.options as type (type.value)}
-                        <option value={type.value}>{type.name}</option>
-                      {/each}
-                    </select>
-                    <div
-                      class="
-                        grid
-                        place-content-center
-                        absolute
-                        top-0
-                        left-0
-                        h-full
-                        w-12
-                      "
-                    >
-                      <ChevronDownIcon
-                        class="
-                          size-6
-                          text-maree-darker-accent
-                        "
-                      />
-                    </div>
-                  </div>
-                </label>
+              <InputSelect
+                options={option.options}
+                getter={() => file.meta[option.type]}
+                setter={(v) => setEachFileValue(v, file, option)}
+                class="
+                  row-span-1
+                "
+              />
             {/each}
           </div>
         </div>
