@@ -4,6 +4,7 @@
 	import Tab from "$lib/components/Tab.svelte";
 	import TypePage from "$lib/components/pages/TypePage.svelte";
 	import AudioPage from "$lib/components/pages/AudioPage.svelte";
+	import { goto } from "$app/navigation";
 
   let { data } = $props();
 
@@ -11,6 +12,7 @@
   let medias = $state([]);
   let types = $state([]);
   let contents = $state([]);
+  let currentTab = $state(0);
   
   let others = $derived.by(() => {
     return contents.filter(c => !c.isLecture);
@@ -85,17 +87,34 @@
   }
 
   function onChangeTab(i) {
-    if (i === 0) loadAudios();
-    if (i === 1) loadMedias();
-    else if (i === 2) loadTypes();
-    else if (i === 3) loadContents();
+    if (i === 0) {
+      loadAudios();
+      goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`)
+    } else if (i === 1) {
+      loadMedias();
+      goto(`/admin/manage?${new URLSearchParams({ tab: 'media' })}`)
+    } else if (i === 2) {
+      loadTypes();
+      goto(`/admin/manage?${new URLSearchParams({ tab: 'type' })}`)
+    } else if (i === 3) {
+      loadContents();
+      goto(`/admin/manage?${new URLSearchParams({ tab: 'content' })}`)
+    }
   }
 
-  $effect(() => {
+  $effect.pre(() => {
     audios = data.audios;
     medias = data.medias;
     types = data.types;
     contents = data.contents;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabQuery = urlParams.get('tab');
+
+    if (tabQuery === 'file') currentTab = 0;
+    else if (tabQuery === 'media') currentTab = 1;
+    else if (tabQuery === 'type') currentTab = 2;
+    else if (tabQuery === 'content') currentTab = 3;
   });
 </script>
 
@@ -109,5 +128,6 @@
   <Tab
     onchange={onChangeTab}
     {items}
+    bind:value={currentTab}
   />
 </section>
