@@ -1,5 +1,16 @@
 <script>
   let { columns, rows, slot = null } = $props();
+
+  function getDataByKey(row, key) {
+    const keys = key.split('.');
+    let value = row;
+
+    for (const k of keys) {
+      value = value[k];
+    }
+
+    return value;
+  }
 </script>
 
 <table
@@ -53,7 +64,7 @@
             {#if column.slot}
               {@render slot(column.slot, row)}
             {:else}
-              {row[column.key]}
+              {getDataByKey(row, column.key)}
             {/if}
           </td>
         {/each}
