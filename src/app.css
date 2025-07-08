@@ -11,3 +11,21 @@ html, body {
     overflow: auto;
     font-family: Cairo;
 }
+
+@theme {
+    --animate-upload-pulse: upload-pulse 1s ease-in-out infinite;
+
+    @keyframes upload-pulse {
+        0% {
+            border-color: transparent;
+        }
+
+        50% {
+            border-color: orange;
+        }
+
+        100% {
+            border-color: transparent;
+        }
+    }
+}

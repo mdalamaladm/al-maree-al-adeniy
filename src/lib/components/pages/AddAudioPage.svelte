@@ -1,4 +1,5 @@
 <script>
+	import { goto } from "$app/navigation";
 	import InputFile from "$lib/components/input/InputFile.svelte";
 	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
 	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
@@ -7,7 +8,7 @@
 	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 
-  let { options } = $props();
+  let { options, isAddPage = $bindable(false), loadAudios } = $props();
 
   let typeValue = $state({
     media: undefined,
@@ -40,21 +41,14 @@
     }
   ]);
 
-  let files = $state([]);
+  let filesReady = $state([]);
+  let filesUpload = $state([]);
   let isUploading = $state(false);
   let order = $state(0);
 
   let isProgressing = $derived.by(() => {
-    return !!files.find(f => f.meta.status === 'progress');
+    return !!filesUpload.find(f => f.meta.status === 'progress');
   })
-
-  let filesReady = $derived.by(() => {
-    return files.filter(f => f.meta.status === 'ready');
-  });
-
-  let filesUpload = $derived.by(() => {
-    return files.filter(f => f.meta.status !== 'ready');
-  });
 
   function setGlobalValue (v, option) {
     typeValue[option.type] = v;
@@ -89,7 +83,7 @@
     }
   }
 
-  function onInputMedia (e) {
+  function onInputFiles (e) {
     const mapped = Array.from(e.target.files).map((f) => ({
       meta: {
         media: typeValue.media,
@@ -119,31 +113,45 @@
       file: f
     }))
 
-    files.push(...mapped);
+    filesReady.push(...mapped);
   }
 
   function onRemoveFile (i) {
-    files = files.filter((_, index) => index !== i);
+    filesReady = filesReady.filter((_, index) => index !== i);
   }
 
   async function onUpload () {
-    files.forEach(f => {
+    filesUpload = filesUpload.concat([...filesReady]);
+    filesReady = [];
+
+    filesUpload.forEach((f, i) => {
       if (f.meta.status === 'ready') {
         f.meta.status = 'wait';
+        f.meta.upload = () => {
+          order = i;
+          f.meta.status = 'wait';
+          isUploading = true;
+        };
+        f.meta.abort = () => {
+          if (f.meta?.xhr) f.meta.xhr.abort();
+          else {
+            f.meta.status = 'abort';
+            orderIncrement();
+          }
+      };
       }
     });
 
-    uploadListButtonClass = 'animate-pulse';
+    uploadListButtonClass = 'animate-upload-pulse';
     setTimeout(() => uploadListButtonClass = '', 2000);
 
     isUploading = true;
   }
 
-  async function eachFileUpload(fileParam) {
-    const file = fileParam || files[order];
+  async function eachFileUpload() {
+    const file = filesUpload[order];
 
     try {
-      file.meta.upload = () => eachFileUpload(file);
       file.meta.status = 'wait';
 
       if (!isProgressing) {
@@ -190,8 +198,10 @@
     } catch(e) {
       console.error(e);
 
-      file.meta.status = 'error';
-      orderIncrement();
+      if (e.message !== 'Network aborted') {
+        file.meta.status = 'error';
+        orderIncrement();
+      }
     }
   }
 
@@ -205,9 +215,9 @@
   }) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
+      
       file.meta.xhr = xhr;
 
-      
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
           onProgress(event);
@@ -216,7 +226,10 @@
 
       xhr.addEventListener('load', () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          onSuccess(xhr, resolve);
+          onSuccess(
+            xhr,
+            resolve
+          );
         } else {
           onError(xhr);
           reject(new Error(`HTTP error! Status: ${xhr.status}`));
@@ -239,12 +252,12 @@
   }
 
   function orderIncrement() {
-    const index = files.findIndex(f => f.meta.status === 'wait');
+    const index = filesUpload.findIndex(f => f.meta.status === 'wait');
 
     if (index > -1) {
       order = index;
     } else {
-      order = files.length;
+      order = filesUpload.length;
     }
   }
 
@@ -259,16 +272,28 @@
     return `${filename}.${extension}`
   }
 
+  function onBeforeClose (e) {
+    if (isUploading) {
+      e.preventDefault();
+
+      e.returnValue = 'Are you sure you want to leave? Your changes may not be saved.';
+    }
+  }
+
   $effect(() => {
     if (isUploading) {
-      if (order < files.length) {
+      if (order < filesUpload.length) {
         if (!isProgressing) {
-          eachFileUpload(order);
+          eachFileUpload();
         }
+      } else {
+        isUploading = false;
       }
     }
   });
 </script>
+
+<svelte:window onbeforeunload={onBeforeClose} />
 
 {#snippet uploadList(close)}
   <div
@@ -285,7 +310,7 @@
         onclick={close}
         type="solid"
         color="secondary"
-        label="Close"
+        label="إغلاق"
       />
     </div>
     <div
@@ -463,7 +488,7 @@
                 {:else if file.meta.status === 'wait' || file.meta.status === 'progress'}
                   <CloseIcon
                     onclick={() => {
-                      file.meta.xhr.abort();
+                      file.meta.abort();
                     }}
                     class="
                       size-8
@@ -480,13 +505,36 @@
 {/snippet}
 
 <section>
-  <Button
-    onclick={() => modal.open(uploadList, { center: false, className: 'w-full h-full bg-white' })}
-    type="solid"
-    color="secondary"
-    label="See List"
-    class={uploadListButtonClass}
-  />
+  <div
+    class="
+      flex
+      items-center
+      justify-between
+    "
+  >
+    <Button
+      onclick={() => {
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'file', add: 'false' })}`);
+        isAddPage = false;
+        loadAudios();
+      }}
+      type="solid"
+      color="secondary"
+      label="رجوع"
+    />
+    <Button
+      onclick={() => modal.open(uploadList, { center: false, className: 'w-full h-full bg-white' })}
+      type="solid"
+      color="secondary"
+      label="التحميلات"
+      class="
+        box-border
+        border-4
+        border-transparent
+        {uploadListButtonClass}
+      "
+    />
+  </div>
   <h1
     class="
       text-6xl
@@ -541,15 +589,15 @@
       "
     >
       <InputFile
-        onInput={onInputMedia}
-        label="أدخل الوسيطة"
+        onInput={onInputFiles}
+        label="إدراج الملفات"
       />
       <Button
         onclick={onUpload}
         type="solid"
         color="secondary"
         disabled={filesReady.length < 1}
-        label="التحميل"
+        label="تحميل"
       />
     </div>
   </div>

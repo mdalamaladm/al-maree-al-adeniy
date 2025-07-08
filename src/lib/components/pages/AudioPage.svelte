@@ -1,4 +1,5 @@
 <script>
+	import { goto } from "$app/navigation";
 	import PencilIcon from "$lib/icons/PencilIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import Button from "../Button.svelte";
@@ -17,18 +18,20 @@
     },
     {
       name: 'الوسيطة',
-      key: 'mediaId'
+      key: 'media.name'
     },
     {
       name: 'النوع',
-      key: 'typeId'
+      key: 'type.name'
     },
     {
       name: 'الموصوع',
-      key: 'contentId'
+      key: 'content.name'
     },
     {
       slot: 'action',
+      align: 'center',
+      width: '100px',
     }
   ];
 
@@ -102,11 +105,18 @@
 
     await loadAudios();
   }
+
+  $effect.pre(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    isAddPage = urlParams.get('add') === 'true';
+  })
 </script>
 
 {#if isAddPage}
   <AddAudioPage
     {options}
+    {loadAudios}
+    bind:isAddPage
   />
 {:else}
   <div>
@@ -118,7 +128,10 @@
       "
     >
       <Button
-        onclick={() => isAddPage = true}
+        onclick={() => {
+          goto(`/admin/manage?${new URLSearchParams({ tab: 'file', add: 'true' })}`);
+          isAddPage = true;
+        }}
         type="solid"
         color="secondary"
         label="الإضافة"
