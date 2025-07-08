@@ -1,10 +1,8 @@
 <script>
-  let { items = [], onchange = () => {} } = $props();
-
-  let currentTab = $state(0);
+  let { items = [], onchange = () => {}, value = $bindable(0) } = $props();
 
   function onClickTab(i) {
-    currentTab = i;
+    value = i;
 
     onchange(i);
   }
@@ -19,7 +17,7 @@
           px-5
           py-3
           text-xl
-          {i === currentTab ? 'bg-maree-secondary text-maree-accent' : 'bg-maree-accent text-maree-secondary'}
+          {i === value ? 'bg-maree-secondary text-maree-accent' : 'bg-maree-accent text-maree-secondary'}
           {i === 0 ? 'rounded-tr-xl' : ''} 
           {i === items.length - 1 ? 'rounded-tl-xl' : ''} 
           cursor-pointer
@@ -35,7 +33,7 @@
     "
   >
     {#each items as item, i (i)}
-      {#if i === currentTab}
+      {#if i === value}
         <item.component {...item.props} />
       {/if}
     {/each}
