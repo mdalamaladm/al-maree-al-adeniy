@@ -5,18 +5,10 @@
     children,
     onClose = () => {}
   } = $props();
-
-  function onCloseModal (e) {
-    if (e.target.classList.contains('the-overlay')) {
-      open = false;
-      onClose();
-    }
-  }
 </script>
 
 {#if open}
   <div
-    onclick={onCloseModal}
     class="
       the-overlay
       fixed
