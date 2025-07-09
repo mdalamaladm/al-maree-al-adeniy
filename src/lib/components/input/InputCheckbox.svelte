@@ -1,5 +1,10 @@
 <script>
-  let{ checked = $bindable(false), label, name = 'checkbox', class: className = '' } = $props();
+  let {
+    checked = $bindable(false),
+    label = null,
+    name = 'checkbox',
+    class: className = ''
+  } = $props();
 </script>
 
 <label
@@ -25,5 +30,7 @@
       bg-maree-darker-accent
     "
   >
-  <p>{label}</p>
+  {#if label}
+    <p>{label}</p>
+  {/if}
 </label>
