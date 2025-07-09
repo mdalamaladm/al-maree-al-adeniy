@@ -21,61 +21,12 @@
 
   let form = $state([
     {
-      name: 'id',
-      value: null,
-      noInput: true,
-    },
-    {
       name: 'name',
       type: 'text',
       label: 'اسم الوسيطة',
       value: null,
     },
   ])
-
-  async function onDelete(close, id) {
-    await fetch(`/api/media/${id}`, {
-      method: 'DELETE',
-    });
-
-    close()
-
-    await loadMedias();
-  }
-
-  async function onSubmitCreate(close, clearForm, formValue) {
-    await fetch('/api/media', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadMedias();
-  }
-
-  async function onSubmitUpdate(close, clearForm, formValue) {
-    await fetch(`/api/media/${formValue.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadMedias();
-  }
 </script>
 
 <div>
@@ -89,9 +40,9 @@
     <Button
       onclick={() => modal.form.open({
         form,
+        formAction: '?/createMedia',
         submitLabel: 'OK',
         cancelLabel: 'إلغاء',
-        onSubmit: onSubmitCreate,
       })}
       type="solid"
       color="secondary"
@@ -112,14 +63,13 @@
         >
           <PencilIcon
             onclick={() => {
-              form[0].value = data.id;
-              form[1].value = data.name;
+              form[0].value = data.name;
 
               modal.form.open({
                 form,
+                formAction: `?/editMedia&${new URLSearchParams({ id: data.id })}`,
                 submitLabel: 'OK',
                 cancelLabel: 'إلغاء',
-                onSubmit: onSubmitUpdate,
               });
             }}
             class="
@@ -130,10 +80,10 @@
           />
           <TrashIcon
             onclick={() => modal.confirm.open({
+              formAction: `?/deleteMedia&${new URLSearchParams({ id: data.id })}`,
               message: `تأكدت حذف وسيطة (${data.name})؟`,
               confirmLabel: 'نعم',
               cancelLabel: 'لا',
-              onConfirm: (close) => onDelete(close, data.id)
             })}
             class="
               mr-5

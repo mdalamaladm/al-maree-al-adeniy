@@ -1,4 +1,5 @@
 <script>
+	import { enhance } from "$app/forms";
 	import Button from "./Button.svelte";
 	import InputCheckbox from "./input/InputCheckbox.svelte";
 	import InputSelect from "./input/InputSelect.svelte";
@@ -7,24 +8,14 @@
 	import Overlay from "./Overlay.svelte";
 
   modal.form = {
-    open ({
-      form,
-      submitLabel,
-      cancelLabel,
-      onSubmit,
-    }) {
-      modal.open(formContent, { form, submitLabel, cancelLabel, onSubmit })
+    open (params) {
+      modal.open(formContent, params)
     }
   }
 
   modal.confirm = {
-    open ({
-      message,
-      cancelLabel,
-      confirmLabel,
-      onConfirm
-    }) {
-      modal.open(confirmContent, { message, cancelLabel, confirmLabel, onConfirm })
+    open (params) {
+      modal.open(confirmContent, params)
     }
   }
 
@@ -39,17 +30,20 @@
   }
 </script>
 
-{#snippet formContent(close, { form, submitLabel, cancelLabel, onSubmit })}
+{#snippet formContent(close, { form, formAction, submitLabel, cancelLabel })}
   <form
-    onsubmit={() => {
-      const formValue = form.reduce((all, input) => {
-        all[input.name] = input.value;
+    method="POST"
+    action={formAction || ''}
+		use:enhance={() => {
+      return async function ({ result, update }) {
+        if (result.type === 'success') {
+          clearForm(form);
+          close();
 
-        return all;
-      }, {});
-
-      onSubmit(close, () => clearForm(form), formValue)}
-    }
+          await update();
+        }
+      }
+    }}
     class="
       w-96
       pl-10
@@ -58,38 +52,36 @@
     "
   >
     {#each form as input, i (i)}
-      {#if !input.noInput}
-        {#if input.type === 'checkbox'}
-          <InputCheckbox
-            label={input.label}
-            name={input.name}
-            bind:checked={input.value}
-            class="
-              mb-5
-            "
-          />
-        {:else if input.type === 'text'}
-          <InputText
-            label={input.label}
-            name={input.name}
-            bind:value={input.value}
-            class="
-              mb-5
-            "
-          />
-        {:else if input.type === 'select'}
-          <InputSelect
-            label={input.label}
-            name={input.name}
-            options={input.options}
-            bind:value={input.value}
-            getter={input.getter}
-            setter={input.setter}
-            class="
-              mb-5
-            "
-          />
-        {/if}
+      {#if input.type === 'checkbox'}
+        <InputCheckbox
+          label={input.label}
+          name={input.name}
+          bind:checked={input.value}
+          class="
+            mb-5
+          "
+        />
+      {:else if input.type === 'text'}
+        <InputText
+          label={input.label}
+          name={input.name}
+          bind:value={input.value}
+          class="
+            mb-5
+          "
+        />
+      {:else if input.type === 'select'}
+        <InputSelect
+          label={input.label}
+          name={input.name}
+          options={input.options}
+          bind:value={input.value}
+          getter={input.getter}
+          setter={input.setter}
+          class="
+            mb-5
+          "
+        />
       {/if}
     {/each}
     <div
@@ -120,9 +112,20 @@
   </form>
 {/snippet}
 
-{#snippet confirmContent(close, { message, cancelLabel, confirmLabel, onConfirm })}
+{#snippet confirmContent(close, { formAction, message, cancelLabel, confirmLabel, onConfirm = () => {} })}
   <form
     onsubmit={() => onConfirm(close)}
+    method="POST"
+    action={formAction}
+    use:enhance={() => {
+      return async function ({ result, update }) {
+        if (result.type === 'success') {
+          close();
+
+          await update();
+        }
+      }
+    }}
     class="
       p-5
     "
