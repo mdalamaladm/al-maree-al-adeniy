@@ -29,6 +29,11 @@
     "
   >
     <input
+      type={show ? 'text' : 'password'}
+      {name}
+      {placeholder}
+      oninput={(e) => onInput(e)}
+      bind:value
       class="
         w-full
         p-2
@@ -38,11 +43,6 @@
         font-medium
         rounded-xl
       "
-      type={show ? 'text' : 'password'}
-      name={name}
-      placeholder={placeholder}
-      oninput={(e) => onInput(e)}
-      bind:value
     >
     <div
       class="

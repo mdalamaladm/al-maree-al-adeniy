@@ -27,6 +27,11 @@
     </p>
   {/if}
   <input
+    type="text"
+    {name}
+    {placeholder}
+    oninput={(e) => onInput(e)}
+    bind:value
     class="
       w-full
       p-2
@@ -35,10 +40,5 @@
       font-medium
       rounded-xl
     "
-    type="text"
-    name={name}
-    placeholder={placeholder}
-    oninput={(e) => onInput(e)}
-    bind:value
   >
 </label>
