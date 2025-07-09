@@ -5,7 +5,7 @@
 	import Table from "../Table.svelte";
   import { modal } from "../modal.svelte";
 
-  let { medias, loadMedias } = $props();
+  let { medias } = $props();
 
   let columns = [
     {

@@ -5,7 +5,7 @@
 	import Table from "../Table.svelte";
   import { modal } from "../modal.svelte";
 
-  let { types, loadTypes } = $props();
+  let { types } = $props();
 
   let columns = [
     {
@@ -21,61 +21,12 @@
 
   let form = $state([
     {
-      name: 'id',
-      value: null,
-      noInput: true,
-    },
-    {
       name: 'name',
       type: 'text',
       label: 'اسم النوع',
       value: null,
     },
-  ])
-
-  async function onDelete(close, id) {
-    await fetch(`/api/type/${id}`, {
-      method: 'DELETE',
-    });
-
-    close()
-
-    await loadTypes();
-  }
-
-  async function onSubmitCreate(close, clearForm, formValue) {
-    await fetch('/api/type', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadTypes();
-  }
-
-  async function onSubmitUpdate(close, clearForm, formValue) {
-    await fetch(`/api/type/${formValue.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadTypes();
-  }
+  ]);
 </script>
 
 <div>
@@ -89,9 +40,9 @@
     <Button
       onclick={() => modal.form.open({
         form,
+        formAction: '?/createType',
         submitLabel: 'OK',
         cancelLabel: 'إلغاء',
-        onSubmit: onSubmitCreate,
       })}
       type="solid"
       color="secondary"
@@ -112,14 +63,13 @@
         >
           <PencilIcon
             onclick={() => {
-              form[0].value = data.id;
-              form[1].value = data.name;
+              form[0].value = data.name;
 
               modal.form.open({
                 form,
+                formAction: `?/editType&${new URLSearchParams({ id: data.id })}`,
                 submitLabel: 'OK',
                 cancelLabel: 'إلغاء',
-                onSubmit: onSubmitUpdate,
               });
             }}
             class="
@@ -130,10 +80,10 @@
           />
           <TrashIcon
             onclick={() => modal.confirm.open({
+              formAction: `?/deleteType&${new URLSearchParams({ id: data.id })}`,
               message: `تأكدت حذف نوع (${data.name})؟`,
               confirmLabel: 'نعم',
               cancelLabel: 'لا',
-              onConfirm: (close) => onDelete(close, data.id)
             })}
             class="
               mr-5

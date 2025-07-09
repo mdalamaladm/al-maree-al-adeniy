@@ -5,7 +5,7 @@
 	import Table from "../Table.svelte";
   import { modal } from "../modal.svelte";
 
-  let { contents, loadContents } = $props();
+  let { contents } = $props();
 
   let columns = [
     {
@@ -26,11 +26,6 @@
 
   let form = $state([
     {
-      name: 'id',
-      value: null,
-      noInput: true,
-    },
-    {
       name: 'name',
       type: 'text',
       label: 'اسم الموضوع',
@@ -42,53 +37,7 @@
       label: 'خاص للدروس',
       value: false,
     }
-  ])
-
-  async function onDelete(close, id) {
-    await fetch(`/api/content/${id}`, {
-      method: 'DELETE',
-    });
-
-    close()
-
-    await loadContents();
-  }
-
-  async function onSubmitCreate(close, clearForm, formValue) {
-    await fetch('/api/content', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-        isLecture: formValue.isLecture,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadContents();
-  }
-
-  async function onSubmitUpdate(close, clearForm, formValue) {
-    await fetch(`/api/content/${formValue.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-        isLecture: formValue.isLecture,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadContents();
-  }
+  ]);
 </script>
 
 <div>
@@ -102,9 +51,9 @@
     <Button
       onclick={() => modal.form.open({
         form,
+        formAction: '?/createContent',
         submitLabel: 'OK',
         cancelLabel: 'إلغاء',
-        onSubmit: onSubmitCreate,
       })}
       type="solid"
       color="secondary"
@@ -125,15 +74,14 @@
         >
           <PencilIcon
             onclick={() => {
-              form[0].value = data.id;
-              form[1].value = data.name;
-              form[2].value = data.isLecture;
+              form[0].value = data.name;
+              form[1].value = data.isLecture;
 
               modal.form.open({
                 form,
+                formAction: `?/editContent&${new URLSearchParams({ id: data.id })}`,
                 submitLabel: 'OK',
                 cancelLabel: 'إلغاء',
-                onSubmit: onSubmitUpdate,
               });
             }}
             class="
@@ -144,10 +92,10 @@
           />
           <TrashIcon
             onclick={() => modal.confirm.open({
+              formAction: `?/deleteContent&${new URLSearchParams({ id: data.id })}`,
               message: `تأكدت حذف موضوع (${data.name})؟`,
               confirmLabel: 'نعم',
               cancelLabel: 'لا',
-              onConfirm: (close) => onDelete(close, data.id)
             })}
             class="
               mr-5
