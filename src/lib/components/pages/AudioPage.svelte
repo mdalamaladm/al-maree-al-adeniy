@@ -37,11 +37,6 @@
 
   let form = $state([
     {
-      name: 'id',
-      value: null,
-      noInput: true,
-    },
-    {
       name: 'name',
       type: 'text',
       label: 'اسم الصوتية',
@@ -76,35 +71,6 @@
     },
   ]);
 
-  async function onDelete(close, id) {
-    await fetch(`/api/file/${id}`, {
-      method: 'DELETE',
-    });
-
-    close()
-
-    await loadAudios();
-  }
-
-  async function onSubmitUpdate(close, clearForm, formValue) {
-    await fetch(`/api/file/${formValue.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: formValue.name,
-        mediaId: formValue.mediaId,
-        typeId: formValue.typeId,
-        contentId: formValue.contentId,
-      })
-    });
-
-    clearForm();
-    close();
-
-    await loadAudios();
-  }
 
   $effect.pre(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -151,17 +117,16 @@
           >
             <PencilIcon
               onclick={() => {
-                form[0].value = data.id;
-                form[1].value = data.name;
-                form[2].value = data.mediaId;
-                form[3].value = data.typeId;
-                form[4].value = data.contentId;
+                form[0].value = data.name;
+                form[1].value = data.mediaId;
+                form[2].value = data.typeId;
+                form[3].value = data.contentId;
 
                 modal.form.open({
                   form,
+                formAction: `?/editFile&${new URLSearchParams({ id: data.id })}`,
                   submitLabel: 'OK',
                   cancelLabel: 'إلغاء',
-                  onSubmit: onSubmitUpdate,
                 });
               }}
               class="
@@ -172,10 +137,10 @@
             />
             <TrashIcon
               onclick={() => modal.confirm.open({
+              formAction: `?/deletFileType&${new URLSearchParams({ id: data.id })}`,
                 message: `تأكدت حذف صوتية (${data.name})؟`,
                 confirmLabel: 'نعم',
                 cancelLabel: 'لا',
-                onConfirm: (close) => onDelete(close, data.id)
               })}
               class="
                 mr-5

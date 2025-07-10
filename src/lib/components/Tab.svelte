@@ -9,7 +9,11 @@
 </script>
 
 <div>
-  <div>
+  <div
+    class="
+      flex
+    "
+  >
     {#each items as item, i (i)}
       <button
         onclick={() => onClickTab(i)}

@@ -1,6 +1,40 @@
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
+  editFile: async ({ url, request, fetch, cookies }) => {
+    const formData = await request.formData();
+    const name = formData.get('name');
+    const mediaId = formData.get('mediaId');
+    const typeId = formData.get('typeId');
+    const contentId = formData.get('contentId');
+
+    const payload = { name, mediaId, typeId, contentId };
+
+    await fetch(`/api/admin/file/${url.searchParams.get('id')}`, {
+      method: 'PUT',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return {
+      success: true,
+    }
+  },
+  deleteFile: async ({ url, fetch, cookies }) => {
+    await fetch(`/api/admin/file/${url.searchParams.get('id')}`, {
+      method: 'DELETE',
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      },
+    });
+
+    return {
+      success: true
+    }
+  },
   createMedia: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
@@ -155,34 +189,63 @@ export const actions = {
   }
 }
 
-export async function load ({ fetch, cookies }) {
-  const resAudios = await fetch('/api/admin/file', {
-    headers: {
-      "Authorization": `Bearer ${cookies.get('auth')}`
-    },
-  });
-  const audios = await resAudios.json();
+export async function load ({ fetch, cookies, url }) {
+  async function loadAudios () {
+    const res = await fetch('/api/admin/file', {
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      }
+    });
 
-  const resMedias = await fetch('/api/admin/media', {
-    headers: {
-      "Authorization": `Bearer ${cookies.get('auth')}`
-    },
-  });
-  const medias = await resMedias.json();
+    return await res.json();
+  }
 
-  const resTypes = await fetch('/api/admin/type', {
-    headers: {
-      "Authorization": `Bearer ${cookies.get('auth')}`
-    },
-  });
-  const types = await resTypes.json();
+  async function loadMedias () {
+    const res = await fetch('/api/admin/media', {
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      }
+    });
 
-  const resContents = await fetch('/api/admin/content', {
-    headers: {
-      "Authorization": `Bearer ${cookies.get('auth')}`
-    },
-  });
-  const contents = await resContents.json();
+    return await res.json();
+  }
+
+  async function loadTypes () {
+    const res = await fetch('/api/admin/type', {
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      }
+    });
+
+    return await res.json();
+  }
+
+  async function loadContents () {
+    const res = await fetch('/api/admin/content', {
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      }
+    });
+
+    return await res.json();
+  }
+
+  let audios = [];
+  let medias = [];
+  let types = [];
+  let contents = [];
+
+  const tab = url.searchParams.get('tab');
+
+  if (tab === null || tab === 'file') {
+    audios = await loadAudios();
+    medias = await loadMedias();
+    types = await loadTypes();
+    contents = await loadContents();
+  }
+  else if (tab === 'media') medias = await loadMedias();
+  else if (tab === 'type') types = await loadTypes();
+  else if (tab === 'content') contents = await loadContents();
 
   if (
     audios.statusCode === 401 ||
@@ -193,11 +256,6 @@ export async function load ({ fetch, cookies }) {
     cookies.delete('auth', { path: '/admin' });
     redirect(303, '/admin/login')
   }
-
-  console.log(audios.length);
-  console.log(medias.length);
-  console.log(types.length);
-  console.log(contents.length);
 
   return {
     audios,
