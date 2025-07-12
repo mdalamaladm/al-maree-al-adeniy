@@ -3,6 +3,7 @@
 	import PencilIcon from "$lib/icons/PencilIcon.svelte";
 	import TrashIcon from "$lib/icons/TrashIcon.svelte";
 	import Button from "../Button.svelte";
+	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 	import Table from "../Table.svelte";
 	import AddAudioPage from "./AddAudioPage.svelte";
@@ -35,7 +36,7 @@
     }
   ];
 
-  let form = $state([
+  let form = $derived([
     {
       name: 'name',
       type: 'text',
@@ -54,20 +55,14 @@
       type: 'select',
       label: 'النوع',
       options: options.types,
-      setter: (v, value) => {
-        if(v === 4) form[3].options = options.lectures;
-        else form[3].options = options.others;
-
-        value = v;
-      },
       value: null
     },
     {
       name: 'contentId',
-      type: 'select',
+      type: 'snippet',
       label: 'الموضوع',
-      options: options.others,
-      value: null
+      value: null,
+      snippet: contentSelect
     },
   ]);
 
@@ -78,6 +73,30 @@
   })
 </script>
 
+{#snippet contentSelect(input, form)}
+  {#if form[2].value === 4}
+    <InputSelect
+      label={input.label}
+      name={input.name}
+      options={options.contents.filter(e => e.isLecture || e.value === 1)}
+      bind:value={input.value}
+      class="
+        mb-5
+      "
+    />
+  {:else}
+    <InputSelect
+      label={input.label}
+      name={input.name}
+      options={options.contents.filter(e => !e.isLecture)}
+      bind:value={input.value}
+      class="
+        mb-5
+      "
+    />
+  {/if}
+{/snippet}
+  
 {#if isAddPage}
   <AddAudioPage
     {options}
@@ -124,7 +143,7 @@
 
                 modal.form.open({
                   form,
-                formAction: `?/editFile&${new URLSearchParams({ id: data.id })}`,
+                  formAction: `?/editFile&${new URLSearchParams({ id: data.id })}`,
                   submitLabel: 'OK',
                   cancelLabel: 'إلغاء',
                 });
@@ -137,7 +156,7 @@
             />
             <TrashIcon
               onclick={() => modal.confirm.open({
-              formAction: `?/deletFileType&${new URLSearchParams({ id: data.id })}`,
+                formAction: `?/deleteFile&${new URLSearchParams({ id: data.id })}`,
                 message: `تأكدت حذف صوتية (${data.name})؟`,
                 confirmLabel: 'نعم',
                 cancelLabel: 'لا',

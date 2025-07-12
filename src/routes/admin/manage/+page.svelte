@@ -13,15 +13,8 @@
   let types = $state([]);
   let contents = $state([]);
   let currentTab = $state(0);
-  
-  let others = $derived.by(() => {
-    return contents.filter(c => !c.isLecture);
-  });
-  let lectures = $derived.by(() => {
-    return contents.filter(c => c.isLecture);
-  });
 
-  let items = $derived([
+  let items = $derived.by(() => [
     {
       name: 'الصوتية',
       props: {
@@ -29,8 +22,7 @@
         options: {
           medias: medias.map(e => ({ name: e.name, value: e.id })),
           types: types.map(e => ({ name: e.name, value: e.id })),
-          others: others.map(e => ({ name: e.name, value: e.id })),
-          lectures: lectures.map(e => ({ name: e.name, value: e.id })),
+          contents: contents.map(e => ({ name: e.name, value: e.id, isLecture: e.isLecture })),
         }
       },
       component: AudioPage,
@@ -75,7 +67,7 @@
     }
   }
 
-  $effect(() => {
+  $effect.pre(() => {
     audios = data.audios;
     medias = data.medias;
     types = data.types;

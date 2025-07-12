@@ -22,7 +22,7 @@ export const actions = {
       return;
     }
 
-    cookies.set('auth', data.access_token, { path: '/admin', maxAge: 60 });
+    cookies.set('auth', data.access_token, { path: '/admin', maxAge: 60 * 60 });
 
     redirect(303, '/admin/manage');
   }

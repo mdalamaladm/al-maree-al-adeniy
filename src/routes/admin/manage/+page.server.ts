@@ -8,7 +8,12 @@ export const actions = {
     const typeId = formData.get('typeId');
     const contentId = formData.get('contentId');
 
-    const payload = { name, mediaId, typeId, contentId };
+    const payload = {
+      name,
+      mediaId: +mediaId,
+      typeId: +typeId,
+      contentId: +contentId,
+    };
 
     await fetch(`/api/admin/file/${url.searchParams.get('id')}`, {
       method: 'PUT',
