@@ -7,7 +7,7 @@
 	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 
-  let { options, isAddPage = $bindable(false), loadAudios } = $props();
+  let { options, isUploading = $bindable(false) } = $props();
 
   let typeValue = $state({
     media: undefined,
@@ -18,8 +18,8 @@
   let uploadListButtonClass = $state('');
 
   let contentOptions = $derived.by(() => {
-    if (typeValue.type === 4) return options.lectures;
-    else return options.others;
+    if (typeValue.type === 4) return options.contents.filter(e => e.isLecture || e.value === 1);
+    else return options.contents.filter(e => !e.isLecture);
   });
 
   let globalOptions = $derived([
@@ -42,7 +42,6 @@
 
   let filesReady = $state([]);
   let filesUpload = $state([]);
-  let isUploading = $state(false);
   let order = $state(0);
 
   let isProgressing = $derived.by(() => {
@@ -54,12 +53,12 @@
 
     if (option.type === 'media') {
       typeValue.type = options.types[0].value;
-      typeValue.content = options.others[0].value;
+      typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
       if (v === 4) {
-        typeValue.content = options.lectures[0].value;
+        typeValue.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
       } else {
-        typeValue.content = options.others[0].value;
+        typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
       }
     }
   }
@@ -69,15 +68,15 @@
 
     if (option.type === 'media') {
       file.meta.type = options.types[0].value;
-      file.meta.options[2].options = options.others;
-      file.meta.content = options.others[0].value;
+      file.meta.options[2].options = options.contents.filter(e => !e.isLecture);
+      file.meta.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
       if (v === 4) {
-        file.meta.options[2].options = options.lectures;
-        file.meta.content = options.lectures[0].value;
+        file.meta.options[2].options = options.contents.filter(e => e.isLecture || e.value === 1);
+        file.meta.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
       } else {
-        file.meta.options[2].options = options.others;
-        file.meta.content = options.others[0].value;
+        file.meta.options[2].options = options.contents.filter(e => !e.isLecture);
+        file.meta.content = options.contents.filter(e => !e.isLecture)[0].value;
       }
     }
   }
@@ -105,7 +104,7 @@
           {
             name: 'الموضوع',
             type: 'content',
-            options: options.others
+            options: options.contents.filter(e => !e.isLecture)
           }
         ],
       },
@@ -154,11 +153,11 @@
       file.meta.status = 'wait';
 
       if (!isProgressing) {
-        const resUploadPresigned = await fetch(`/api/file/upload/presigned`);
+        const resUploadPresigned = await fetch(`/api/admin/file/upload/presigned`);
 
         const { key, presigned } = await resUploadPresigned.json();
 
-        await uploadXHR({
+        const success = await uploadXHR({
           url: presigned,
           file,
           onProgress: (event) => {
@@ -167,40 +166,40 @@
           },
           onError: () => {
             file.meta.status = 'error';
-            orderIncrement();
           },
           onAbort: () => {
             file.meta.status = 'abort';
-            orderIncrement();
           }
         });
 
-        const payload = {
-          name: file.file.name,
-          key,
-          mediaId: file.meta.media,
-          typeId: file.meta.type,
-          contentId: file.meta.content,
-        };
+        if (success) {
+          const payload = {
+            name: file.file.name,
+            key,
+            mediaId: file.meta.media,
+            typeId: file.meta.type,
+            contentId: file.meta.content,
+          };
 
-        await fetch('/api/file', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload)
-        });
+          await fetch('/api/admin/file', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+          });
 
-        file.meta.status = 'complete';
-        orderIncrement();
+          file.meta.status = 'complete';
+        }
       }
     } catch(e) {
       console.error(e);
 
       if (e.message !== 'Network aborted') {
         file.meta.status = 'error';
-        orderIncrement();
       }
+    } finally {
+      orderIncrement();
     }
   }
 
@@ -208,7 +207,7 @@
     url,
     file,
     onProgress = () => {},
-    onSuccess = (_, resolve) => resolve(),
+    onSuccess = (_, resolve) => resolve(true),
     onError = () => {},
     onAbort = () => {}
   }) {
@@ -277,6 +276,24 @@
 
       e.returnValue = 'Are you sure you want to leave? Your changes may not be saved.';
     }
+  }
+
+  function goBack () {
+    if (isUploading) {
+      const confirm = window.confirm('Are you sure you want to leave? Your changes may not be saved.');
+
+      if (confirm) {
+        abortAll();
+
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`);
+      }
+    } else goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`);
+  }
+
+  function abortAll () {
+    filesUpload.forEach(f => {
+      f.meta.abort();
+    });
   }
 
   $effect(() => {
@@ -512,11 +529,7 @@
     "
   >
     <Button
-      onclick={() => {
-        goto(`/admin/manage?${new URLSearchParams({ tab: 'file', add: 'false' })}`);
-        isAddPage = false;
-        loadAudios();
-      }}
+      onclick={goBack}
       type="solid"
       color="secondary"
       label="رجوع"

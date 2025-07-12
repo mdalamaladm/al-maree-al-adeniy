@@ -195,7 +195,7 @@ export const actions = {
 }
 
 export async function load ({ fetch, cookies, url }) {
-  async function loadAudios () {
+  async function loadFiles () {
     const res = await fetch('/api/admin/file', {
       headers: {
         "Authorization": `Bearer ${cookies.get('auth')}`
@@ -235,15 +235,15 @@ export async function load ({ fetch, cookies, url }) {
     return await res.json();
   }
 
-  let audios = [];
+  let files = [];
   let medias = [];
   let types = [];
   let contents = [];
 
   const tab = url.searchParams.get('tab');
 
-  if (tab === null || tab === 'file') {
-    audios = await loadAudios();
+  if (tab === null || tab === 'file' || tab === 'add-file') {
+    files = await loadFiles();
     medias = await loadMedias();
     types = await loadTypes();
     contents = await loadContents();
@@ -253,7 +253,7 @@ export async function load ({ fetch, cookies, url }) {
   else if (tab === 'content') contents = await loadContents();
 
   if (
-    audios.statusCode === 401 ||
+    files.statusCode === 401 ||
     medias.statusCode === 401 ||
     types.statusCode === 401 ||
     contents.statusCode === 401
@@ -263,7 +263,7 @@ export async function load ({ fetch, cookies, url }) {
   }
 
   return {
-    audios,
+    files,
     medias,
     types,
     contents,

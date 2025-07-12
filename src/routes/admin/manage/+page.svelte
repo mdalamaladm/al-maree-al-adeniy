@@ -8,17 +8,21 @@
 
   let { data } = $props();
 
-  let audios = $state([]);
+  let files = $state([]);
   let medias = $state([]);
   let types = $state([]);
   let contents = $state([]);
   let currentTab = $state(0);
+  let isAddFilePage = $state(false);
+  let isUploading = $state(false);
 
   let items = $derived.by(() => [
     {
       name: 'الملف',
       props: {
-        audios,
+        files,
+        isAddFilePage,
+        isUploading,
         options: {
           medias: medias.map(e => ({ name: e.name, value: e.id })),
           types: types.map(e => ({ name: e.name, value: e.id })),
@@ -56,19 +60,27 @@
 
 
   function onChangeTab(i) {
-    if (i === 0) {
-      goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`)
-    } else if (i === 1) {
-      goto(`/admin/manage?${new URLSearchParams({ tab: 'media' })}`)
-    } else if (i === 2) {
-      goto(`/admin/manage?${new URLSearchParams({ tab: 'type' })}`)
-    } else if (i === 3) {
-      goto(`/admin/manage?${new URLSearchParams({ tab: 'content' })}`)
+    let confirm = true;
+
+    if (isUploading) {
+      confirm = window.confirm('Are you sure you want to leave? Your changes may not be saved.');
+    }
+
+    if (confirm) {
+      if (i === 0) {
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`)
+      } else if (i === 1) {
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'media' })}`)
+      } else if (i === 2) {
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'type' })}`)
+      } else if (i === 3) {
+        goto(`/admin/manage?${new URLSearchParams({ tab: 'content' })}`)
+      }
     }
   }
 
   $effect.pre(() => {
-    audios = data.audios;
+    files = data.files;
     medias = data.medias;
     types = data.types;
     contents = data.contents;
@@ -76,7 +88,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     const tabQuery = urlParams.get('tab');
 
-    if (tabQuery === 'file') currentTab = 0;
+    if (tabQuery === 'file') {
+      currentTab = 0;
+      isAddFilePage = false;
+    }
+    else if (tabQuery === 'add-file') {
+      currentTab = 0;
+      isAddFilePage = true;
+    }
     else if (tabQuery === 'media') currentTab = 1;
     else if (tabQuery === 'type') currentTab = 2;
     else if (tabQuery === 'content') currentTab = 3;

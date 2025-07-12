@@ -8,13 +8,11 @@
 	import Table from "../Table.svelte";
 	import AddFilePage from "./AddFilePage.svelte";
 
-  let { audios, loadAudios, options } = $props();
-
-  let isAddPage = $state(false);
+  let { files, isAddFilePage, options, isUploading = $bindable(false) } = $props();
 
   let columns = [
     {
-      name: 'اسم الصوتية',
+      name: 'اسم الملف',
       key: 'name'
     },
     {
@@ -40,7 +38,7 @@
     {
       name: 'name',
       type: 'text',
-      label: 'اسم الصوتية',
+      label: 'اسم الملف',
       value: null,
     },
     {
@@ -66,11 +64,6 @@
     },
   ]);
 
-
-  $effect.pre(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    isAddPage = urlParams.get('add') === 'true';
-  })
 </script>
 
 {#snippet contentSelect(input, form)}
@@ -97,11 +90,10 @@
   {/if}
 {/snippet}
   
-{#if isAddPage}
+{#if isAddFilePage}
   <AddFilePage
     {options}
-    {loadAudios}
-    bind:isAddPage
+    bind:isUploading
   />
 {:else}
   <div>
@@ -114,17 +106,16 @@
     >
       <Button
         onclick={() => {
-          goto(`/admin/manage?${new URLSearchParams({ tab: 'file', add: 'true' })}`);
-          isAddPage = true;
+          goto(`/admin/manage?${new URLSearchParams({ tab: 'add-file' })}`);
         }}
         type="solid"
         color="secondary"
-        label="الإضافة"
+        label="إضافة"
       />
     </div>
     <Table
       {columns}
-      rows={audios}
+      rows={files}
     >
       {#snippet slot(name, data)}
         {#if name === 'action'}
@@ -157,7 +148,7 @@
             <TrashIcon
               onclick={() => modal.confirm.open({
                 formAction: `?/deleteFile&${new URLSearchParams({ id: data.id })}`,
-                message: `تأكدت حذف صوتية (${data.name})؟`,
+                message: `تأكدت حذف ملف (${data.name})؟`,
                 confirmLabel: 'نعم',
                 cancelLabel: 'لا',
               })}
