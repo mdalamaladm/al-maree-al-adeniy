@@ -52,7 +52,9 @@
     "
   >
     {#each form as input, i (i)}
-      {#if input.type === 'checkbox'}
+      {#if input.type === 'snippet'} 
+        {@render input.snippet(input, form, i)}
+      {:else if input.type === 'checkbox'}
         <InputCheckbox
           label={input.label}
           name={input.name}
