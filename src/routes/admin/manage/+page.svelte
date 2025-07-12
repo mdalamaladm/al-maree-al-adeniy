@@ -3,7 +3,7 @@
 	import MediaPage from "$lib/components/pages/MediaPage.svelte";
 	import Tab from "$lib/components/Tab.svelte";
 	import TypePage from "$lib/components/pages/TypePage.svelte";
-	import AudioPage from "$lib/components/pages/AudioPage.svelte";
+	import FilePage from "$lib/components/pages/FilePage.svelte";
 	import { goto } from "$app/navigation";
 
   let { data } = $props();
@@ -16,7 +16,7 @@
 
   let items = $derived.by(() => [
     {
-      name: 'الصوتية',
+      name: 'الملف',
       props: {
         audios,
         options: {
@@ -25,7 +25,7 @@
           contents: contents.map(e => ({ name: e.name, value: e.id, isLecture: e.isLecture })),
         }
       },
-      component: AudioPage,
+      component: FilePage,
       formAction: '?/loadFile',
     },
     {

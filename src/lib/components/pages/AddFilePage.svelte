@@ -2,7 +2,6 @@
 	import { goto } from "$app/navigation";
 	import InputFile from "$lib/components/input/InputFile.svelte";
 	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
-	import ChevronDownIcon from "$lib/icons/ChevronDownIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
 	import Button from "../Button.svelte";
 	import InputSelect from "../input/InputSelect.svelte";

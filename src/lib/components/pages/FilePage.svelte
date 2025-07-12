@@ -6,7 +6,7 @@
 	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 	import Table from "../Table.svelte";
-	import AddAudioPage from "./AddAudioPage.svelte";
+	import AddFilePage from "./AddFilePage.svelte";
 
   let { audios, loadAudios, options } = $props();
 
@@ -98,7 +98,7 @@
 {/snippet}
   
 {#if isAddPage}
-  <AddAudioPage
+  <AddFilePage
     {options}
     {loadAudios}
     bind:isAddPage
