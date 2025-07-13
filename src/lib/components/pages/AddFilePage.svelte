@@ -7,7 +7,7 @@
 	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 
-  let { options, isUploading = $bindable(false) } = $props();
+  let { options, isUploading = $bindable(false), auth } = $props();
 
   let typeValue = $state({
     media: undefined,
@@ -153,7 +153,12 @@
       file.meta.status = 'wait';
 
       if (!isProgressing) {
-        const resUploadPresigned = await fetch(`/api/admin/file/upload/presigned`);
+        const resUploadPresigned = await fetch(`/api/admin/file/upload/presigned`, {
+          method: 'GET',
+          headers: {
+            "Authorization": `Bearer ${auth}`
+          }
+        });
 
         const { key, presigned } = await resUploadPresigned.json();
 
@@ -184,7 +189,8 @@
           await fetch('/api/admin/file', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json'
+              'Content-Type': 'application/json',
+              "Authorization": `Bearer ${auth}`
             },
             body: JSON.stringify(payload)
           });

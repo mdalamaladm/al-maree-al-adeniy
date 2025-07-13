@@ -8,7 +8,7 @@
 	import Table from "../Table.svelte";
 	import AddFilePage from "./AddFilePage.svelte";
 
-  let { files, isAddFilePage, options, isUploading = $bindable(false) } = $props();
+  let { auth, files, isAddFilePage, options, isUploading = $bindable(false) } = $props();
 
   let columns = [
     {
@@ -92,6 +92,7 @@
   
 {#if isAddFilePage}
   <AddFilePage
+    {auth}
     {options}
     bind:isUploading
   />

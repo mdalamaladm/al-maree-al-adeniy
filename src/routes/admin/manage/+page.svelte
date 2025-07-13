@@ -20,6 +20,7 @@
     {
       name: 'الملف',
       props: {
+        auth: data.auth,
         files,
         isAddFilePage,
         isUploading,
@@ -89,16 +90,21 @@
     const tabQuery = urlParams.get('tab');
 
     if (tabQuery === 'file') {
-      currentTab = 0;
       isAddFilePage = false;
-    }
-    else if (tabQuery === 'add-file') {
       currentTab = 0;
+    } else if (tabQuery === 'add-file') {
       isAddFilePage = true;
+      currentTab = 0;
+    } else if (tabQuery === 'media') {
+      isAddFilePage = false;
+      currentTab = 1;
+    } else if (tabQuery === 'type') {
+      isAddFilePage = false;
+      currentTab = 2;
+    } else if (tabQuery === 'content') {
+      isAddFilePage = false;
+      currentTab = 3;
     }
-    else if (tabQuery === 'media') currentTab = 1;
-    else if (tabQuery === 'type') currentTab = 2;
-    else if (tabQuery === 'content') currentTab = 3;
   });
 </script>
 

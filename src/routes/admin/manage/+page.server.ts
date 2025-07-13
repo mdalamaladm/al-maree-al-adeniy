@@ -195,10 +195,12 @@ export const actions = {
 }
 
 export async function load ({ fetch, cookies, url }) {
+  const auth = cookies.get('auth');
+
   async function loadFiles () {
     const res = await fetch('/api/admin/file', {
       headers: {
-        "Authorization": `Bearer ${cookies.get('auth')}`
+        "Authorization": `Bearer ${auth}`
       }
     });
 
@@ -208,7 +210,7 @@ export async function load ({ fetch, cookies, url }) {
   async function loadMedias () {
     const res = await fetch('/api/admin/media', {
       headers: {
-        "Authorization": `Bearer ${cookies.get('auth')}`
+        "Authorization": `Bearer ${auth}`
       }
     });
 
@@ -218,7 +220,7 @@ export async function load ({ fetch, cookies, url }) {
   async function loadTypes () {
     const res = await fetch('/api/admin/type', {
       headers: {
-        "Authorization": `Bearer ${cookies.get('auth')}`
+        "Authorization": `Bearer ${auth}`
       }
     });
 
@@ -228,7 +230,7 @@ export async function load ({ fetch, cookies, url }) {
   async function loadContents () {
     const res = await fetch('/api/admin/content', {
       headers: {
-        "Authorization": `Bearer ${cookies.get('auth')}`
+        "Authorization": `Bearer ${auth}`
       }
     });
 
@@ -267,5 +269,6 @@ export async function load ({ fetch, cookies, url }) {
     medias,
     types,
     contents,
+    auth,
   }
 }
