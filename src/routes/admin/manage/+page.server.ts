@@ -43,8 +43,12 @@ export const actions = {
   createMedia: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
+    const alias = formData.get('alias');
 
-    const payload = { name };
+    const payload = {
+      name,
+      alias,
+    };
 
     await fetch('/api/admin/media', {
       method: 'POST',
@@ -62,8 +66,12 @@ export const actions = {
   editMedia: async ({ url, request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
+    const alias = formData.get('alias');
 
-    const payload = { name };
+    const payload = {
+      name,
+      alias,
+    };
 
     await fetch(`/api/admin/media/${url.searchParams.get('id')}`, {
       method: 'PUT',
@@ -93,8 +101,12 @@ export const actions = {
   createType: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
+    const alias = formData.get('alias');
 
-    const payload = { name };
+    const payload = {
+      name,
+      alias,
+    };
 
     await fetch('/api/admin/type', {
       method: 'POST',
@@ -112,8 +124,12 @@ export const actions = {
   editType: async ({ url, request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
+    const alias = formData.get('alias');
 
-    const payload = { name };
+    const payload = {
+      name,
+      alias,
+    };
 
     await fetch(`/api/admin/type/${url.searchParams.get('id')}`, {
       method: 'PUT',

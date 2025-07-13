@@ -28,6 +28,22 @@
       key: 'content.name'
     },
     {
+      name: 'تاريخ الصناعة',
+      key: 'createdAt'
+    },
+    {
+      name: 'تاريخ التعديل',
+      key: 'updatedAt'
+    },
+    {
+      name: 'فاعل الصناعة',
+      key: 'createdBy'
+    },
+    {
+      name: 'فاعل التعديل',
+      key: 'updatedBy'
+    },
+    {
       slot: 'action',
       align: 'center',
       width: '100px',

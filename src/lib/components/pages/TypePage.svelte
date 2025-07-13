@@ -13,6 +13,26 @@
       key: 'name'
     },
     {
+      name: 'لقب النوع',
+      key: 'alias',
+    },
+    {
+      name: 'تاريخ الصناعة',
+      key: 'createdAt'
+    },
+    {
+      name: 'تاريخ التعديل',
+      key: 'updatedAt'
+    },
+    {
+      name: 'فاعل الصناعة',
+      key: 'createdBy'
+    },
+    {
+      name: 'فاعل التعديل',
+      key: 'updatedBy'
+    },
+    {
       slot: 'action',
       align: 'center',
       width: '100px'
@@ -25,6 +45,12 @@
       type: 'text',
       label: 'اسم النوع',
       value: null,
+    },
+    {
+      name: 'alias',
+      type: 'text',
+      label: 'لقب النوع',
+      value: null
     },
   ]);
 </script>
@@ -64,6 +90,7 @@
           <PencilIcon
             onclick={() => {
               form[0].value = data.name;
+              form[1].value = data.alias;
 
               modal.form.open({
                 form,
