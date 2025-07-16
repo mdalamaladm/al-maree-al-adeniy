@@ -5,6 +5,7 @@
 	import TypePage from "$lib/components/pages/TypePage.svelte";
 	import FilePage from "$lib/components/pages/FilePage.svelte";
 	import { goto } from "$app/navigation";
+	import Button from "$lib/components/Button.svelte";
 
   let { data } = $props();
 
@@ -115,6 +116,19 @@
     bg-maree-main
   "
 >
+  <form
+    method="POST"
+    action="?/logout"
+    class="mb-10"
+  >
+    <Button
+      type="solid"
+      color="secondary"
+      class="bg-red-600"
+      label="تسجيل الخروج"
+      submit
+    />
+  </form>
   <Tab
     onchange={onChangeTab}
     {items}

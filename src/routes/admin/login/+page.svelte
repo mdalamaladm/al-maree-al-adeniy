@@ -54,7 +54,7 @@
 			color="secondary"
 			submit
 			block
-			label="ادخل"
+			label="تسجيل الدخول"
 		/>
 	</form>
 </section>

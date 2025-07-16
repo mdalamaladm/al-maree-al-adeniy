@@ -207,6 +207,11 @@ export const actions = {
     return {
       success: true
     }
+  },
+  logout: async ({ cookies }) => {
+    cookies.delete('auth', { path: '/admin' });
+
+    redirect(303, '/admin/manage');
   }
 }
 
@@ -279,6 +284,20 @@ export async function load ({ fetch, cookies, url }) {
     cookies.delete('auth', { path: '/admin' });
     redirect(303, '/admin/login')
   }
+
+  if (
+    files.statusCode === 404 ||
+    medias.statusCode === 404 ||
+    types.statusCode === 404 ||
+    contents.statusCode === 404
+  ) {
+    files = [];
+    medias = [];
+    types = [];
+    contents = [];
+  }
+
+  console.log(files);
 
   return {
     files,
