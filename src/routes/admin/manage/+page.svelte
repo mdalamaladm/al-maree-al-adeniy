@@ -6,6 +6,7 @@
 	import FilePage from "$lib/components/pages/FilePage.svelte";
 	import { goto } from "$app/navigation";
 	import Button from "$lib/components/Button.svelte";
+	import { manage } from "./manage.svelte.js";
 
   let { data } = $props();
 
@@ -15,7 +16,6 @@
   let contents = $state([]);
   let currentTab = $state(0);
   let isAddFilePage = $state(false);
-  let isUploading = $state(false);
 
   let items = $derived.by(() => [
     {
@@ -24,10 +24,9 @@
         auth: data.auth,
         files,
         isAddFilePage,
-        isUploading,
         options: {
-          medias: medias.map(e => ({ name: e.name, value: e.id })),
-          types: types.map(e => ({ name: e.name, value: e.id })),
+          medias: medias.map(e => ({ name: e.name, value: e.alias })),
+          types: types.map(e => ({ name: e.name, value: e.alias })),
           contents: contents.map(e => ({ name: e.name, value: e.id, isLecture: e.isLecture })),
         }
       },
@@ -64,7 +63,7 @@
   function onChangeTab(i) {
     let confirm = true;
 
-    if (isUploading) {
+    if (manage.isUploading) {
       confirm = window.confirm('Are you sure you want to leave? Your changes may not be saved.');
     }
 

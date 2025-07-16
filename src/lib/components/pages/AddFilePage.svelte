@@ -3,11 +3,12 @@
 	import InputFile from "$lib/components/input/InputFile.svelte";
 	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
+	import { manage } from "../../../routes/admin/manage/manage.svelte";
 	import Button from "../Button.svelte";
 	import InputSelect from "../input/InputSelect.svelte";
 	import { modal } from "../modal.svelte";
 
-  let { options, isUploading = $bindable(false), auth } = $props();
+  let { options, auth } = $props();
 
   let typeValue = $state({
     media: undefined,
@@ -128,7 +129,7 @@
         f.meta.upload = () => {
           order = i;
           f.meta.status = 'wait';
-          isUploading = true;
+          manage.isUploading = true;
         };
         f.meta.abort = () => {
           if (f.meta?.xhr) f.meta.xhr.abort();
@@ -143,7 +144,7 @@
     uploadListButtonClass = 'animate-upload-pulse';
     setTimeout(() => uploadListButtonClass = '', 2000);
 
-    isUploading = true;
+    manage.isUploading = true;
   }
 
   async function eachFileUpload() {
@@ -277,7 +278,7 @@
   }
 
   function onBeforeClose (e) {
-    if (isUploading) {
+    if (manage.isUploading) {
       e.preventDefault();
 
       e.returnValue = 'Are you sure you want to leave? Your changes may not be saved.';
@@ -285,7 +286,7 @@
   }
 
   function goBack () {
-    if (isUploading) {
+    if (manage.isUploading) {
       const confirm = window.confirm('Are you sure you want to leave? Your changes may not be saved.');
 
       if (confirm) {
@@ -303,13 +304,13 @@
   }
 
   $effect(() => {
-    if (isUploading) {
+    if (manage.isUploading) {
       if (order < filesUpload.length) {
         if (!isProgressing) {
           eachFileUpload();
         }
       } else {
-        isUploading = false;
+        manage.isUploading = false;
       }
     }
   });
