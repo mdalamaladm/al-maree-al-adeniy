@@ -68,6 +68,14 @@
     }
 
     if (confirm) {
+      manage.isUploading = false;
+
+      manage.filesUpload.forEach(f => {
+        f.meta.abort();
+      });
+
+      manage.filesUpload = [];
+
       if (i === 0) {
         goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`)
       } else if (i === 1) {

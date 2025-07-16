@@ -10,8 +10,8 @@ export const actions = {
 
     const payload = {
       name,
-      mediaId: +mediaId,
-      typeId: +typeId,
+      mediaId,
+      typeId,
       contentId: +contentId,
     };
 
@@ -296,8 +296,6 @@ export async function load ({ fetch, cookies, url }) {
     types = [];
     contents = [];
   }
-
-  console.log(files);
 
   return {
     files,

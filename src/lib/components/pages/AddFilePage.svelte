@@ -42,11 +42,10 @@
   ]);
 
   let filesReady = $state([]);
-  let filesUpload = $state([]);
   let order = $state(0);
 
   let isProgressing = $derived.by(() => {
-    return !!filesUpload.find(f => f.meta.status === 'progress');
+    return !!manage.filesUpload.find(f => f.meta.status === 'progress');
   })
 
   function setGlobalValue (v, option) {
@@ -120,10 +119,10 @@
   }
 
   async function onUpload () {
-    filesUpload = filesUpload.concat([...filesReady]);
+    manage.filesUpload = manage.filesUpload.concat([...filesReady]);
     filesReady = [];
 
-    filesUpload.forEach((f, i) => {
+    manage.filesUpload.forEach((f, i) => {
       if (f.meta.status === 'ready') {
         f.meta.status = 'wait';
         f.meta.upload = () => {
@@ -148,7 +147,7 @@
   }
 
   async function eachFileUpload() {
-    const file = filesUpload[order];
+    const file = manage.filesUpload[order];
 
     try {
       file.meta.status = 'wait';
@@ -257,12 +256,12 @@
   }
 
   function orderIncrement() {
-    const index = filesUpload.findIndex(f => f.meta.status === 'wait');
+    const index = manage.filesUpload.findIndex(f => f.meta.status === 'wait');
 
     if (index > -1) {
       order = index;
     } else {
-      order = filesUpload.length;
+      order = manage.filesUpload.length;
     }
   }
 
@@ -290,22 +289,20 @@
       const confirm = window.confirm('Are you sure you want to leave? Your changes may not be saved.');
 
       if (confirm) {
-        abortAll();
+        manage.filesUpload.forEach(f => {
+          f.meta.abort();
+        });
+
+        manage.filesUpload = [];
 
         goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`);
       }
     } else goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`);
   }
 
-  function abortAll () {
-    filesUpload.forEach(f => {
-      f.meta.abort();
-    });
-  }
-
   $effect(() => {
     if (manage.isUploading) {
-      if (order < filesUpload.length) {
+      if (order < manage.filesUpload.length) {
         if (!isProgressing) {
           eachFileUpload();
         }
@@ -347,7 +344,7 @@
         overflow-y-auto
       "
     >
-      {#each filesUpload as file, i (i)}
+      {#each manage.filesUpload as file, i (i)}
           <div
             class="
               flex-[0_1_300px]

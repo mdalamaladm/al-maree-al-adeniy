@@ -1,3 +1,4 @@
 export let manage = $state({
-  isUploading: false
+  isUploading: false,
+  filesUpload: []
 })
