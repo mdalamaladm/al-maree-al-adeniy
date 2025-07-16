@@ -80,7 +80,7 @@
     rows={types}
   >
     {#snippet slot(name, data)}
-      {#if name === 'action' && !(data.id === 1 || data.id === 2 || data.id === 3 || data.id === 4 || data.id === 5)}
+      {#if name === 'action' && !(data.alias === 'none' || data.alias === 'muhadharat' || data.alias === 'khuthab' || data.alias === 'durus' || data.alias === 'fatawa')}
         <div
           class="
             flex
@@ -94,7 +94,7 @@
 
               modal.form.open({
                 form,
-                formAction: `?/editType&${new URLSearchParams({ id: data.id })}`,
+                formAction: `?/editType&${new URLSearchParams({ id: data.alias })}`,
                 submitLabel: 'OK',
                 cancelLabel: 'إلغاء',
               });
@@ -107,7 +107,7 @@
           />
           <TrashIcon
             onclick={() => modal.confirm.open({
-              formAction: `?/deleteType&${new URLSearchParams({ id: data.id })}`,
+              formAction: `?/deleteType&${new URLSearchParams({ id: data.alias })}`,
               message: `تأكدت حذف نوع (${data.name})؟`,
               confirmLabel: 'نعم',
               cancelLabel: 'لا',

@@ -80,7 +80,7 @@
     rows={medias}
   >
     {#snippet slot(name, data)}
-      {#if name === 'action' && !(data.id === 1 || data.id === 2 || data.id === 3)}
+      {#if name === 'action' && !(data.alias === 'none' || data.alias === 'audio' || data.alias === 'video')}
         <div
           class="
             flex
@@ -94,7 +94,7 @@
 
               modal.form.open({
                 form,
-                formAction: `?/editMedia&${new URLSearchParams({ id: data.id })}`,
+                formAction: `?/editMedia&${new URLSearchParams({ id: data.alias })}`,
                 submitLabel: 'OK',
                 cancelLabel: 'إلغاء',
               });
@@ -107,7 +107,7 @@
           />
           <TrashIcon
             onclick={() => modal.confirm.open({
-              formAction: `?/deleteMedia&${new URLSearchParams({ id: data.id })}`,
+              formAction: `?/deleteMedia&${new URLSearchParams({ id: data.alias })}`,
               message: `تأكدت حذف وسيطة (${data.name})؟`,
               confirmLabel: 'نعم',
               cancelLabel: 'لا',
