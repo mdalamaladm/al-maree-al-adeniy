@@ -17,6 +17,11 @@
       key: 'alias',
     },
     {
+      name: 'الأنواع',
+      slot: 'types',
+      width: '300px',
+    },
+    {
       name: 'تاريخ الصناعة',
       key: 'createdAt'
     },
@@ -80,7 +85,9 @@
     rows={medias}
   >
     {#snippet slot(name, data)}
-      {#if name === 'action' && !(data.alias === 'none' || data.alias === 'audio' || data.alias === 'video')}
+      {#if name === 'types'}
+        {data.types.map(t => t.name).join(', ')}
+      {:else if name === 'action' && !(data.alias === 'none' || data.alias === 'audio' || data.alias === 'video')}
         <div
           class="
             flex
