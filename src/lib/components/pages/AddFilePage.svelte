@@ -186,7 +186,7 @@
             contentId: file.meta.content,
           };
 
-          await fetch('/api/admin/file', {
+          const res = await fetch('/api/admin/file', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -194,6 +194,10 @@
             },
             body: JSON.stringify(payload)
           });
+
+          if (res.status >= 400 && res.status < 600) {
+            throw new Error(res.statusText);
+          }
 
           file.meta.status = 'complete';
         }
