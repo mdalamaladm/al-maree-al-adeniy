@@ -1,20 +1,12 @@
 <script>
   let navigations = [
     {
-      name: 'المحاضرات',
-      href: '/audio/muhadharat',
+      name: 'الصوتية',
+      href: '/audio',
     },
     {
-      name: 'الخطب',
-      href: '/audio/khuthab',
-    },
-    {
-      name: 'الدروس',
-      href: '/audio/durus',
-    },
-    {
-      name: 'الفتاوى',
-      href: '/audio/fatwa',
+      name: 'الفيديو',
+      href: '/video',
     },
   ]
 </script>
@@ -81,7 +73,7 @@
       self-center
     "
   >
-  {#each navigations as nav}
+  {#each navigations as nav, i (i)}
     <a
       href={nav.href}
       class="
