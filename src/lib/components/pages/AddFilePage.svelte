@@ -274,8 +274,8 @@
     const extension = splitted.pop();
     let filename = splitted.join('.');
 
-    if (filename.length > 50) {
-      filename = `${filename.slice(0, 50)}...`
+    if (filename.length > 40) {
+      filename = `${filename.slice(0, 40)}...`
     }
     return `${filename}.${extension}`
   }
@@ -644,6 +644,7 @@
             class="
               flex
               items-center
+              justify-between
             "
           >
             <p

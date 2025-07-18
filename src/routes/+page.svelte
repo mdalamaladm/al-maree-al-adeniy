@@ -4,10 +4,10 @@
       name: 'الصوتية',
       href: '/audio',
     },
-    {
-      name: 'الفيديو',
-      href: '/video',
-    },
+    // {
+    //   name: 'الفيديو',
+    //   href: '/video',
+    // },
   ]
 </script>
 

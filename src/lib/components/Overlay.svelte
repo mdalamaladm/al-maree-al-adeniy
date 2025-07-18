@@ -3,12 +3,21 @@
     open = $bindable(false),
     center = false,
     children,
+    closeOutside = false,
     onClose = () => {}
   } = $props();
+
+  function onCloseModal (e) {
+    if (closeOutside && e.target.classList.contains('the-overlay')) {
+      open = false;
+      onClose();
+    }
+  }
 </script>
 
 {#if open}
   <div
+    onclick={onCloseModal}
     class="
       the-overlay
       fixed

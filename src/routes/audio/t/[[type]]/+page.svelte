@@ -8,74 +8,20 @@
   let { data } = $props();
 
   let open = $state(false);
-  let playlist = $state([
-    {
-      id: 1,
-      name: 'صلة الرحم',
-      src: '/sample-1.mp3',
-    },
-    {
-      id: 2,
-      name: 'الاعتصام بالسنة والحذر من البدعة',
-      src: '/sample-2.mp3',
-    },
-    {
-      id: 3,
-      name: 'الفوز والنجاح بالتمسك بالكتاب والسنة',
-      src: '/sample-3.mp3',
-    },
-    {
-      id: 4,
-      name: 'من اصول اهل السنة',
-      src: '/sample-4.mp3',
-    },
-    {
-      id: 5,
-      name: 'شكر نعم الله تعالى',
-      src: '/sample-5.mp3',
-    },
-    {
-      id: 6,
-      name: 'الله يدعو إلى دينه',
-      src: '/sample-6.mp3',
-    },
-    {
-      id: 7,
-      name: 'محاضرة جامعة في احكام الصيام',
-      src: '/sample-7.mp3',
-    },
-    {
-      id: 8,
-      name: 'حاجتنا إلى العمل الصالح',
-      src: '/sample-8.mp3',
-    },
-    {
-      id: 9,
-      name: 'التمسك بدين الله سر نجاح الأمة',
-      src: '/sample-9.mp3',
-    },
-    {
-      id: 10,
-      name: 'الآلات التي يحتاج إليها الدعاة إلى الله',
-      src: '/sample-10.mp3',
-    },
-    {
-      id: 11,
-      name: 'الحذر من فتنة القتل',
-      src: '/sample-11.mp3',
-    },
-    {
-      id: 12,
-      name: 'شكر نعمة الإسلام والسنة',
-      src: '/sample-12.mp3',
-    }
-  ]);
+  let content = $state(null);
 
-  let trackNumber = $state(1);
+  let trackNumber = $state(data.playlist[0]?.id);
 
   let track = $derived.by(() => {
-    return playlist.find(s => s.id === trackNumber);
+    return data.playlist.find(s => s.id === trackNumber) || { name: '' };
   });
+  let filteredPlaylist = $derived.by(() => {
+    if (content) {
+      return data.playlist.filter(p => p.content === content);
+    } else {
+      return data.playlist;
+    }
+  })
 
   function onChangeAudio (id) {
     trackNumber = id;
@@ -83,7 +29,7 @@
   }
 
   function handleEnd () {
-    if (trackNumber === playlist.length - 1) {
+    if (trackNumber === data.playlist.length - 1) {
       trackNumber = 0;
     } else {
       trackNumber++;
@@ -107,10 +53,13 @@
     bg-maree-main
   "
 >
-  <Overlay bind:open>
+  <Overlay
+    bind:open
+    closeOutside
+  >
     <Playlist
       {onChangeAudio}
-      {playlist}
+      playlist={filteredPlaylist}
       {trackNumber}
       class="
         h-full
@@ -160,7 +109,7 @@
   >
     <Playlist
       {onChangeAudio}
-      {playlist}
+      playlist={filteredPlaylist}
       {trackNumber}
       class="
         hidden
@@ -180,7 +129,7 @@
           font-medium
         "
       >
-        {data.name}
+        {data.typeName}
       </h1>
       <div
         class="
@@ -190,13 +139,16 @@
         "
       >
         <select
+          bind:value={content}
           class="
             py-5
             px-10
             text-2xl
           "
         >
-          <option>العقيدة والتوحيد</option>
+          {#each data.contents as content (content.value)}  
+            <option value={content.value}>{content.name}</option>
+          {/each}
         </select>
       </div>
       <p
