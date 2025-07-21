@@ -4,12 +4,14 @@ export const actions = {
   editFile: async ({ url, request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
+    const extension = formData.get('extension');
     const mediaId = formData.get('mediaId');
     const typeId = formData.get('typeId');
     const contentId = formData.get('contentId');
 
     const payload = {
       name,
+      extension,
       mediaId,
       typeId,
       contentId: +contentId,

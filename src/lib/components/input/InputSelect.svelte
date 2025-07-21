@@ -8,7 +8,8 @@
     options = [],
     getter = () => value,
     setter = (v) => value = v,
-    class: className = ''
+    class: className = '',
+    ...props
   } = $props();
 </script>
 
@@ -49,6 +50,7 @@
         rounded-xl
         appearance-none
       "
+      {...props}
     >
       {#each options as opt (opt.value)}
         <option value={opt.value}>{opt.name}</option>

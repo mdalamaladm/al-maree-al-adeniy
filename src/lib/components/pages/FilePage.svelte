@@ -16,6 +16,10 @@
       key: 'name'
     },
     {
+      name: 'امتداد الملف',
+      key: 'extension'
+    },
+    {
       name: 'الوسيطة',
       key: 'media.name'
     },
@@ -58,6 +62,12 @@
       value: null,
     },
     {
+      name: 'extension',
+      type: 'text',
+      label: 'امتداد الملف',
+      value: null,
+    },
+    {
       name: 'mediaId',
       type: 'select',
       label: 'الوسيطة',
@@ -66,15 +76,17 @@
     },
     {
       name: 'typeId',
-      type: 'select',
+      type: 'snippet',
       label: 'النوع',
       options: options.types,
-      value: null
+      value: null,
+      snippet: typeSelect
     },
     {
       name: 'contentId',
       type: 'snippet',
       label: 'الموضوع',
+      options: options.contents,
       value: null,
       snippet: contentSelect
     },
@@ -82,12 +94,29 @@
 
 </script>
 
+{#snippet typeSelect (input, form)}
+<InputSelect
+  onchange={(e) => {
+    console.log('VALUE', e.target.value);
+    if (e.target.value === 'durus') form[3].value = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
+    else form[3].value = options.contents.filter(e => !e.isLecture)[0].value
+  }}
+  label={input.label}
+  name={input.name}
+  options={input.options}
+  bind:value={input.value}
+  class="
+    mb-5
+  "
+/>
+{/snippet}
+
 {#snippet contentSelect(input, form)}
-  {#if form[2].value === 4}
+  {#if form[2].value === 'durus'}
     <InputSelect
       label={input.label}
       name={input.name}
-      options={options.contents.filter(e => e.isLecture || e.value === 1)}
+      options={input.options.filter(e => e.isLecture || e.value === 1)}
       bind:value={input.value}
       class="
         mb-5
@@ -97,7 +126,7 @@
     <InputSelect
       label={input.label}
       name={input.name}
-      options={options.contents.filter(e => !e.isLecture)}
+      options={input.options.filter(e => !e.isLecture)}
       bind:value={input.value}
       class="
         mb-5
@@ -144,9 +173,10 @@
             <PencilIcon
               onclick={() => {
                 form[0].value = data.name;
-                form[1].value = data.mediaId;
-                form[2].value = data.typeId;
-                form[3].value = data.contentId;
+                form[1].value = data.extension;
+                form[2].value = data.mediaId;
+                form[3].value = data.typeId;
+                form[4].value = data.contentId;
 
                 modal.form.open({
                   form,

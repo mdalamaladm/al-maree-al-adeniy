@@ -2,7 +2,7 @@
 	import { onMount } from "svelte";
 	import PlayButton from "$lib/components/audio-player/PlayButton.svelte";
 
-  let { src, handleEnd } = $props();
+  let { src, length, handleEnd } = $props();
 
   let chunk = $state(30);
   let amplitudes = $state(new Array(chunk).fill(-1));
@@ -13,7 +13,7 @@
   let seekable = $state(0);
   let isPlay = $state(false);
   let isMouseDown = $state(false);
-  let isReady = $state(false);
+  let isReady = $state(true);
   let timeout = $state(null);
 
   let l = $derived.by(() => {
@@ -41,8 +41,6 @@
     innerWidth = window.innerWidth;
 
     onChangeInnerWidth();
-
-    loadAudio();
   })
   
   async function loadAudio (src) {
@@ -50,23 +48,58 @@
 
     audioElement.pause();
     currentTime = 0;
-    isReady = false;
+    // isReady = false;
     isPlay = false;
     resetAmplitudes();
 
-    const response = await fetch(`/audio${src}`);
-    const audioContext = new AudioContext();
-    const blob = await response.blob();
-    const buffer = await blob.arrayBuffer();
-    audioElement.src = URL.createObjectURL(blob);
-    const audioBuffer = await audioContext.decodeAudioData(buffer);
-    rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
-    currentTime = audioElement.currentTime;
-    seekable = audioElement.seekable.length ? (audioElement.seekable.end(audioElement.seekable.length - 1)) : 0;
-    
-    setAmplitudes();
+    console.log('URLLLL', src);
 
-    isReady = true;
+    const mediaSource = new MediaSource();
+    const audio = new Audio();
+
+    function d (ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+    audioElement.src = URL.createObjectURL(mediaSource);
+    mediaSource.addEventListener('sourceopen', async () => {
+      console.log('TEST BUFFER');
+      const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg'); // Or 'audio/mp4', etc.
+      // You can set the update mode here if needed, e.g., 'sequence'
+      // sourceBuffer.mode = 'sequence'; 
+      const response = await fetch(src);
+      const reader = response.body?.getReader();
+      console.log('READER', reader);
+
+      if (!sourceBuffer.updating) { // Check if the buffer is not already updating
+          const { value } = await reader?.read();
+            console.log('UPDATE BUFFER', value);
+          sourceBuffer.appendBuffer(value.buffer);
+      }
+      
+      // Handle 'updateend' event to append next buffer
+      sourceBuffer.addEventListener('updateend', async () => {
+        if (!sourceBuffer.updating) { // Check if the buffer is not already updating
+            const { value } = await reader?.read();
+            console.log('UPDATE BUFFER 2', value);
+          // await d(2000);
+          // sourceBuffer.appendBuffer(new ArrayBuffer(8));
+            // sourceBuffer.appendBuffer(value.buffer);
+        }
+          // Logic to append the next audio chunk/buffer
+          // For example, fetch the next chunk and call sourceBuffer.appendBuffer()
+      });
+    });
+
+    // const audioContext = new AudioContext();
+    // const blob = await response.blob();
+    // const buffer = await blob.arrayBuffer();
+    // audioElement.src = URL.createObjectURL(blob);
+    // const audioBuffer = await audioContext.decodeAudioData(buffer);
+    // rawData = audioBuffer.getChannelData(0); // We only need to work with one channel of data
+    // currentTime = audioElement.currentTime;
+    // seekable = audioElement.seekable.length ? (audioElement.seekable.end(audioElement.seekable.length - 1)) : 0;
+    
+    // setAmplitudes();
+
+    // isReady = true;
   }
 
   function sleep (ms) {
@@ -200,7 +233,6 @@
     controls
     controlsList="nodownload"
     preload="metadata"
-    class="hidden"
   ></audio>
   <div
     class="

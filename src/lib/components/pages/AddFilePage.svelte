@@ -19,7 +19,7 @@
   let uploadListButtonClass = $state('');
 
   let contentOptions = $derived.by(() => {
-    if (typeValue.type === 4) return options.contents.filter(e => e.isLecture || e.value === 1);
+    if (typeValue.type === 'durus') return options.contents.filter(e => e.isLecture || e.value === 1);
     else return options.contents.filter(e => !e.isLecture);
   });
 
@@ -55,7 +55,7 @@
       typeValue.type = options.types[0].value;
       typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
-      if (v === 4) {
+      if (v === 'durus') {
         typeValue.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
       } else {
         typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
@@ -71,7 +71,7 @@
       file.meta.options[2].options = options.contents.filter(e => !e.isLecture);
       file.meta.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
-      if (v === 4) {
+      if (v === 'durus') {
         file.meta.options[2].options = options.contents.filter(e => e.isLecture || e.value === 1);
         file.meta.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
       } else {
@@ -178,8 +178,13 @@
         });
 
         if (success) {
+          const splitted = file.file.name.split('.');
+          const extension = splitted.pop();
+          let name = splitted.join('.');
+
           const payload = {
-            name: file.file.name,
+            name,
+            extension,
             key,
             mediaId: file.meta.media,
             typeId: file.meta.type,

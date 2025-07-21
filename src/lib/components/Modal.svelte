@@ -83,6 +83,7 @@
           class="
             mb-5
           "
+          {...input.props}
         />
       {/if}
     {/each}

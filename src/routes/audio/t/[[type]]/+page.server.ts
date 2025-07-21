@@ -25,18 +25,8 @@ export async function load ({ params, fetch, url }) {
 
   let playlist = await loadFiles();
   playlist = playlist
-    .map(f => {
-      const splitted = f.name.split('.');
-      const extension = splitted.pop();
-      let filename = splitted.join('.');
-      
-      return {
-        id: f.id,
-        name: filename,
-        extension,
-        content: f.content.id
-      }
-    });
+    .map(f => ({ ...f, content: f.content.id}));
+    
   const type = await loadType();
   let contents = await loadContents();
   contents = [

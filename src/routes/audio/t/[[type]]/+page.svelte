@@ -11,6 +11,8 @@
   let content = $state(null);
 
   let trackNumber = $state(data.playlist[0]?.id);
+  let trackSrc = $state(null);
+  let trackLength = $state(null);
 
   let track = $derived.by(() => {
     return data.playlist.find(s => s.id === trackNumber) || { name: '' };
@@ -39,6 +41,25 @@
   function onResize () {
     open = false;
   }
+
+  $effect(() => {
+    async function run () {
+      const response = await fetch('/audio', {
+        method: 'POST',
+        body: JSON.stringify({ id: track.id }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const { src, length } = await response.json();
+
+      trackSrc = src;
+      trackLength = length;
+    }
+
+    run();
+  })
 </script>
 
 <svelte:window
@@ -53,6 +74,7 @@
     bg-maree-main
   "
 >
+{JSON.stringify(track)}
   <Overlay
     bind:open
     closeOutside
@@ -163,7 +185,8 @@
         {track.name}
       </p>
       <AudioPlayer
-        src={track.src}
+        src={trackSrc}
+        length={trackLength}
         {handleEnd}
       />
     </div>
