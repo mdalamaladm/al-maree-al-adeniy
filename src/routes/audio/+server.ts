@@ -8,7 +8,7 @@ export async function POST ({ request, fetch }) {
   const { ContentLength: length } = await headRes.json();
 
   const res = await fetch(`/api/file/${id}`);
-  const src = await res.text();
+  const { src, duration } = await res.json();
 
-  return json({ src, length }, { status: 201 });
+  return json({ src, duration, length }, { status: 201 });
 }

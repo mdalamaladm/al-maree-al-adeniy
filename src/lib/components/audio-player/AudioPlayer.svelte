@@ -2,13 +2,14 @@
 	import { onMount } from "svelte";
 	import PlayButton from "$lib/components/audio-player/PlayButton.svelte";
 
-  let { src, length, handleEnd } = $props();
+  let { src, duration, length, handleEnd } = $props();
 
   let chunk = $state(30);
   let amplitudes = $state(new Array(chunk).fill(-1));
   let rawData = $state([]);
   let innerWidth = $state(null);
   let audioElement = $state(null);
+  let audioElementDuration = $state(null);
   let currentTime = $state(0);
   let seekable = $state(0);
   let isPlay = $state(false);
@@ -37,7 +38,8 @@
   
 
   onMount(() => {
-    audioElement = document.querySelector('audio');
+    audioElement = document.querySelector('audio.player');
+    audioElementDuration = document.querySelector('audio.duration')
     innerWidth = window.innerWidth;
 
     onChangeInnerWidth();
@@ -57,7 +59,12 @@
     const mediaSource = new MediaSource();
     const audio = new Audio();
 
-    function d (ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+    const response = await fetch(src);
+    const response2 = await fetch(src);
+    const blob = await response.blob();
+    const reader = response2.body?.getReader();
+    console.log('READER', reader);
+    audioElement.duration = duration;
     audioElement.src = URL.createObjectURL(mediaSource);
     mediaSource.addEventListener('sourceopen', async () => {
       console.log('TEST BUFFER');
@@ -72,6 +79,7 @@
           const { value } = await reader?.read();
             console.log('UPDATE BUFFER', value);
           sourceBuffer.appendBuffer(value.buffer);
+          rawData.concat([...value.buffer]);
       }
       
       // Handle 'updateend' event to append next buffer
@@ -81,7 +89,9 @@
             console.log('UPDATE BUFFER 2', value);
           // await d(2000);
           // sourceBuffer.appendBuffer(new ArrayBuffer(8));
-            // sourceBuffer.appendBuffer(value.buffer);
+          sourceBuffer.appendBuffer(value.buffer);
+          rawData.concat([...value.buffer]);
+
         }
           // Logic to append the next audio chunk/buffer
           // For example, fetch the next chunk and call sourceBuffer.appendBuffer()
@@ -219,6 +229,19 @@
   $effect(() => {
     loadAudio(src);
   })
+
+  function onLoadMetaData () {
+  }
+
+  $effect(() => {
+    if (audioElementDuration?.readyState > 0) {
+      console.log('DURATION', audioElementDuration?.duration);
+    } else {
+      audioElementDuration?.addEventListener('loadedmetadata', () => {
+        console.log('DURATION', audioElementDuration?.duration);
+      });
+    }
+  })
 </script>
 
 <svelte:window
@@ -227,12 +250,19 @@
 />
 
 <div>
+  {rawData.length}
   <audio
     ontimeupdate={onTimeUpdate}
     onended={onEnded}
     controls
     controlsList="nodownload"
     preload="metadata"
+    class="player"
+  ></audio>
+  <audio
+    onloadedmetadata={onLoadMetaData}
+    preload="metadata"
+    class="duration"
   ></audio>
   <div
     class="

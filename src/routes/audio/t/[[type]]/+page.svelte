@@ -12,6 +12,7 @@
 
   let trackNumber = $state(data.playlist[0]?.id);
   let trackSrc = $state(null);
+  let trackDuration = $state(null);
   let trackLength = $state(null);
 
   let track = $derived.by(() => {
@@ -52,9 +53,10 @@
         }
       });
 
-      const { src, length } = await response.json();
+      const { src, duration, length } = await response.json();
 
       trackSrc = src;
+      trackDuration = duration;
       trackLength = length;
     }
 
@@ -186,6 +188,7 @@
       </p>
       <AudioPlayer
         src={trackSrc}
+        duration={trackDuration}
         length={trackLength}
         {handleEnd}
       />
