@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 
 export async function POST ({ request, fetch }) {
-  console.log('POST');
   const { id } = await request.json();
 
   const headRes = await fetch(`/api/file/meta/${id}?${new URLSearchParams({ ContentLength: 'true' })}`);

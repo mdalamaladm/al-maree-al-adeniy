@@ -76,7 +76,6 @@
     bg-maree-main
   "
 >
-{JSON.stringify(track)}
   <Overlay
     bind:open
     closeOutside
@@ -187,6 +186,7 @@
         {track.name}
       </p>
       <AudioPlayer
+        id={track.id}
         src={trackSrc}
         duration={trackDuration}
         length={trackLength}
