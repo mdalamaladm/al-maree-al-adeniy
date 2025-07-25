@@ -2,10 +2,11 @@
 	import { onMount } from "svelte";
 	import PlayButton from "$lib/components/audio-player/PlayButton.svelte";
 
-  let { id, src, handleEnd } = $props();
+  let { id, src, amplitudes, handleEnd } = $props();
 
-  let chunk = $state(30);
-  let amplitudes = $state(new Array(chunk).fill(-1));
+  let chunk = $state(60);
+  let _amplitudes = $state(new Array(chunk).fill(-1));
+  let _id = $state(null);
   let rawData = [];
   let innerWidth = $state(null);
   let audioElement = $state(null);
@@ -41,27 +42,28 @@
     onChangeInnerWidth();
   })
 
-  async function setAmplitudes () {
-    const samples = chunk; // Number of samples we want to have in our final data set
-    const blockSize = Math.floor(rawData.length / samples); // the number of samples in each subdivision
-    const filteredData = []
+  function setAmplitudes () {
+    const result = [];
+    let i = 0;
+    let merged = 0;
 
-    for (let i = 0; i < samples; i++) {
-      let blockStart = blockSize * i; // the location of the first sample in the block
-      let sum = 0;
-      for (let j = 0; j < blockSize; j++) {
-        sum = sum + Math.abs(rawData[blockStart + j]) // find the sum of all the samples in the block
+    while (i < 60) {
+      if (merged < 60 - chunk) {
+        const avg = (amplitudes[i] + amplitudes[i + 1]) / 2;
+        result.push(avg);
+        i += 2;
+        merged++;
+      } else {
+        result.push(amplitudes[i]);
+        i++;
       }
-
-      filteredData.push(sum / blockSize * 6); // divide the sum by the block size to get the average
     }
 
-    const multiplier = Math.pow(Math.max(...filteredData), -1);
-    amplitudes = filteredData.map(n => n * multiplier);
+    _amplitudes = result;
   }
 
   function resetAmplitudes () {
-    amplitudes = new Array(chunk).fill(-1);
+    _amplitudes = new Array(chunk).fill(-1);
   }
 
   function onTimeUpdate (e) {
@@ -132,8 +134,6 @@
       innerWidth = e.target.innerWidth;
 
       onChangeInnerWidth();
-
-      if (rawData.length > 0) setAmplitudes();
     }, 2000)
   }
 
@@ -153,19 +153,26 @@
     } else {
       chunk = 60;
     }
-
-    amplitudes = new Array(chunk).fill(-1);
   }
 
   $effect(() => {
-    id;
+    // Make sure this "reset" only run when the id is different
+    if (id !== _id) {
+      _id = id;
 
-    audioElement.pause();
-    audioElement.currentTime = 0;
-    currentTime = 0;
-    isReady = false;
-    isPlay = false;
-    resetAmplitudes();
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      currentTime = 0;
+      isReady = false;
+      isPlay = false;
+      resetAmplitudes();
+    }
+  })
+
+  $effect(() => {
+    if (isReady) {
+      setAmplitudes();
+    }
   })
 </script>
 
@@ -221,7 +228,7 @@
           h-48
         "
       >
-        {#each amplitudes as ap, i}
+        {#each _amplitudes as ap, i}
           <div
             onmousedown={(e) => onMouseDown(e, i)}
             onmousemove={(e) => onMouseMove(e, i)}
@@ -235,7 +242,7 @@
               transition-[height]
             "
             style="
-              height: {ap < 0 ? (0.05 * 200) : (ap * 200)}px;
+              height: {ap < 0 ? (0.05 * 200) : (ap)}px;
               background: {ap < 0 ? '#95BB76' : (l.current >= i * l.block && l.current <= (i + 1) * l.block ? `linear-gradient(to left, #D3F7AD ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%, #95BB76 ${Math.floor(((l.current - (l.block * i)) / l.block) * 100)}%)` : (l.current <= (i + 1) * l.block ? '#95BB76' : '#D3F7AD'))}
             "
           ></div>

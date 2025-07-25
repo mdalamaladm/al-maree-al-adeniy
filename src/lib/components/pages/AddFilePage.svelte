@@ -6,6 +6,7 @@
 	import { manage } from "../../../routes/admin/manage/manage.svelte";
 	import Button from "../Button.svelte";
 	import InputSelect from "../input/InputSelect.svelte";
+	import { loader } from "../loader.svelte";
 	import { modal } from "../modal.svelte";
 
   let { options, auth } = $props();
@@ -15,8 +16,10 @@
     type: undefined,
     content: undefined,
   });
-
   let uploadListButtonClass = $state('');
+  let filesReady = $state([]);
+  let order = $state(0);
+
 
   let contentOptions = $derived.by(() => {
     if (typeValue.type === 'durus') return options.contents.filter(e => e.isLecture || e.value === 1);
@@ -40,9 +43,6 @@
       options: contentOptions
     }
   ]);
-
-  let filesReady = $state([]);
-  let order = $state(0);
 
   let isProgressing = $derived.by(() => {
     return !!manage.filesUpload.find(f => f.meta.status === 'progress');
@@ -81,37 +81,70 @@
     }
   }
 
-  function onInputFiles (e) {
-    const mapped = Array.from(e.target.files).map((f) => ({
-      meta: {
-        media: typeValue.media,
-        type: typeValue.type,
-        content: typeValue.content,
-        xhr: null,
-        progress: 0,
-        status: 'ready',
-        options: [
-          {
-            name: 'الوسيطة',
-            type: 'media',
-            options: options.medias
-          },
-          {
-            name: 'النوع',
-            type: 'type',
-            options: options.types
-          },
-          {
-            name: 'الموضوع',
-            type: 'content',
-            options: options.contents.filter(e => !e.isLecture)
-          }
-        ],
-      },
-      file: f
-    }))
+  async function getAmplitudes (file) {
+    const audioContext = new AudioContext();
+    const buffer = await file.arrayBuffer();
+    const audioBuffer = await audioContext.decodeAudioData(buffer);
+    const rawData = audioBuffer.getChannelData(0);
+    const samples = 60;
+    const blockSize = Math.floor(rawData.length / samples);
+    const filteredData = []
 
-    filesReady.push(...mapped);
+    for (let i = 0; i < samples; i++) {
+      let blockStart = blockSize * i;
+      let sum = 0;
+      for (let j = 0; j < blockSize; j++) {
+        sum = sum + Math.abs(rawData[blockStart + j]) 
+      }
+
+      filteredData.push(Math.round((sum / blockSize * 6) * 200));
+    }
+
+    return JSON.stringify(filteredData);
+  }
+
+  async function onInputFiles (e) {
+    try {
+      loader.start('إعداد الملفات');
+      const files = Array.from(e.target.files);
+      const mapped = [];
+
+      for (const f of files) {
+        mapped.push({
+          meta: {
+            media: typeValue.media,
+            type: typeValue.type,
+            content: typeValue.content,
+            amplitudes: await getAmplitudes(f),
+            xhr: null,
+            progress: 0,
+            status: 'ready',
+            options: [
+              {
+                name: 'الوسيطة',
+                type: 'media',
+                options: options.medias
+              },
+              {
+                name: 'النوع',
+                type: 'type',
+                options: options.types
+              },
+              {
+                name: 'الموضوع',
+                type: 'content',
+                options: options.contents.filter(e => !e.isLecture)
+              }
+            ],
+          },
+          file: f
+        })
+      }
+
+      filesReady.push(...mapped);
+    } finally {
+      loader.end();
+    }    
   }
 
   function onRemoveFile (i) {
@@ -181,11 +214,13 @@
           const splitted = file.file.name.split('.');
           const extension = splitted.pop();
           let name = splitted.join('.');
+          const amplitudes = file.meta.amplitudes;
 
           const payload = {
             name,
             extension,
             key,
+            amplitudes,
             mediaId: file.meta.media,
             typeId: file.meta.type,
             contentId: file.meta.content,

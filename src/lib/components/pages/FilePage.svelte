@@ -97,9 +97,8 @@
 {#snippet typeSelect (input, form)}
 <InputSelect
   onchange={(e) => {
-    console.log('VALUE', e.target.value);
-    if (e.target.value === 'durus') form[3].value = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
-    else form[3].value = options.contents.filter(e => !e.isLecture)[0].value
+    if (e.target.value === 'durus') form[4].value = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
+    else form[4].value = options.contents.filter(e => !e.isLecture)[0].value
   }}
   label={input.label}
   name={input.name}
@@ -112,7 +111,7 @@
 {/snippet}
 
 {#snippet contentSelect(input, form)}
-  {#if form[2].value === 'durus'}
+  {#if form[3].value === 'durus'}
     <InputSelect
       label={input.label}
       name={input.name}

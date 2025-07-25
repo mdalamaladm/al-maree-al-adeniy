@@ -188,8 +188,7 @@
       <AudioPlayer
         id={track.id}
         src={trackSrc}
-        duration={trackDuration}
-        length={trackLength}
+        amplitudes={track.amplitudes}
         {handleEnd}
       />
     </div>

@@ -1,9 +1,7 @@
 <script>
-  let { items = [], onchange = () => {}, value = $bindable(0) } = $props();
+  let { items = [], onchange = (i, value) => value = i, value = $bindable(0) } = $props();
 
   function onClickTab(i) {
-    value = i;
-
     onchange(i);
   }
 </script>

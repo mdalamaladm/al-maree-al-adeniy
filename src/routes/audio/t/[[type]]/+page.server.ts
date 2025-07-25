@@ -25,7 +25,11 @@ export async function load ({ params, fetch, url }) {
 
   let playlist = await loadFiles();
   playlist = playlist
-    .map(f => ({ ...f, content: f.content.id}));
+    .map(f => ({
+      ...f,
+      content: f.content.id,
+      amplitudes: JSON.parse(f.amplitudes),
+    }));
     
   const type = await loadType();
   let contents = await loadContents();

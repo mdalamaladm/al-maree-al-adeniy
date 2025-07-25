@@ -77,7 +77,7 @@
       })}
       type="solid"
       color="secondary"
-      label="الإضافة"
+      label="إضافة"
     />
   </div>
   <Table

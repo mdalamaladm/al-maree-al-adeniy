@@ -60,7 +60,7 @@
   ]);
 
 
-  function onChangeTab(i) {
+  function onChangeTab(i, value) {
     let confirm = true;
 
     if (manage.isUploading) {
@@ -75,6 +75,8 @@
       });
 
       manage.filesUpload = [];
+
+      value = i;
 
       if (i === 0) {
         goto(`/admin/manage?${new URLSearchParams({ tab: 'file' })}`)
