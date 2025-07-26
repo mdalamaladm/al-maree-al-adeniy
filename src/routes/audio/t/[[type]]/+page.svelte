@@ -1,9 +1,10 @@
 <script>
   import AudioPlayer from "$lib/components/audio-player/AudioPlayer.svelte";
-	import HomeIcon from "$lib/icons/HomeIcon.svelte";
 	import Playlist from "$lib/components/audio-player/Playlist.svelte";
 	import PlaylistIcon from "$lib/icons/PlaylistIcon.svelte";
 	import Overlay from "$lib/components/Overlay.svelte";
+  import BreadCrumbs from "$lib/components/BreadCrumbs.svelte";
+	import InboxIcon from "$lib/icons/InboxIcon.svelte";
 
   let { data } = $props();
 
@@ -102,20 +103,35 @@
       lg:justify-start
     "
   >
-    <a
-      href="/"
+    <BreadCrumbs
+      items={[
+        {
+          href: '/',
+        },
+        {
+          href: '/audio',
+          name: 'الصوتية'
+        },
+        {
+          name: data.typeName
+        },
+      ]}
       class="
-        m-5
-        text-maree-dark-accent
+        mx-3
+        md:mx-10
+        my-8
       "
-    >
-			<HomeIcon />
-		</a>
+    />
+
 		<button
       onclick={() => open = true}
       class="
         lg:hidden
-        m-5
+        self-start
+        my-8
+        ml-5
+        mr-2
+        md:mr-5
         text-maree-dark-accent
         cursor-pointer
       "
@@ -126,7 +142,6 @@
   <div
     class="
       lg:flex
-      lg:justify-center
       lg:items-stretch
     "
   >
@@ -142,7 +157,11 @@
         min-h-[550px]
       "
     />
-    <div>
+    <div
+      class="
+        flex-1
+      "
+    >
       <h1
         class="
           my-2
@@ -164,6 +183,7 @@
         <select
           bind:value={content}
           class="
+            w-[250px]
             py-5
             px-10
             text-2xl
@@ -185,12 +205,48 @@
       >
         {track.name}
       </p>
-      <AudioPlayer
-        id={track.id}
-        src={trackSrc}
-        amplitudes={track.amplitudes}
-        {handleEnd}
-      />
+      {#if data.playlist.length > 0}
+        <AudioPlayer
+          id={track.id}
+          src={trackSrc}
+          amplitudes={track.amplitudes}
+          {handleEnd}
+        />
+      {:else}
+        <div
+          class="
+            flex-1
+            flex
+            flex-col
+            items-center
+            text-maree-darker-accent
+          "
+        >
+          <InboxIcon
+            class="
+              size-25
+              mt-10
+              mb-5
+            "
+          />
+          <p
+            class="
+              mb-5
+              text-4xl
+              font-medium
+            "
+          >
+            عذرا
+          </p>
+          <p
+            class="
+              text-2xl
+            "
+          >
+            الصوتيات فارغة
+          </p>
+        </div>
+      {/if}
     </div>
   </div>
 </section>

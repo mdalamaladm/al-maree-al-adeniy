@@ -45,6 +45,7 @@ export async function load ({ params, fetch, url }) {
     }));
 
   return {
+    typeAlias: type.alias,
     typeName: type.name,
     contents,
     playlist,
