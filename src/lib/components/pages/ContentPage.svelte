@@ -9,7 +9,7 @@
 
   let columns = [
     {
-      name: 'اسم الموضوع',
+      name: 'اسم موضوع',
       key: 'name'
     },
     {
@@ -18,19 +18,19 @@
       slot: 'isLecture'
     },
     {
-      name: 'تاريخ الصناعة',
+      name: 'تاريخ صناعة',
       key: 'createdAt'
     },
     {
-      name: 'تاريخ التعديل',
+      name: 'تاريخ تعديل',
       key: 'updatedAt'
     },
     {
-      name: 'فاعل الصناعة',
+      name: 'فاعل صناعة',
       key: 'createdBy'
     },
     {
-      name: 'فاعل التعديل',
+      name: 'فاعل تعديل',
       key: 'updatedBy'
     },
     {
@@ -44,7 +44,7 @@
     {
       name: 'name',
       type: 'text',
-      label: 'اسم الموضوع',
+      label: 'اسم موضوع',
       value: null,
     },
     {

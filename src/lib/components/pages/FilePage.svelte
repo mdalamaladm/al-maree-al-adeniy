@@ -12,39 +12,39 @@
 
   let columns = [
     {
-      name: 'اسم الملف',
+      name: 'اسم ملف',
       key: 'name'
     },
     {
-      name: 'امتداد الملف',
+      name: 'امتداد ملف',
       key: 'extension'
     },
     {
-      name: 'الوسيطة',
+      name: 'وسيطة',
       key: 'media.name'
     },
     {
-      name: 'النوع',
+      name: 'نوع',
       key: 'type.name'
     },
     {
-      name: 'الموصوع',
+      name: 'موصوع',
       key: 'content.name'
     },
     {
-      name: 'تاريخ الصناعة',
+      name: 'تاريخ صناعة',
       key: 'createdAt'
     },
     {
-      name: 'تاريخ التعديل',
+      name: 'تاريخ تعديل',
       key: 'updatedAt'
     },
     {
-      name: 'فاعل الصناعة',
+      name: 'فاعل صناعة',
       key: 'createdBy'
     },
     {
-      name: 'فاعل التعديل',
+      name: 'فاعل تعديل',
       key: 'updatedBy'
     },
     {
@@ -58,26 +58,26 @@
     {
       name: 'name',
       type: 'text',
-      label: 'اسم الملف',
+      label: 'اسم ملف',
       value: null,
     },
     {
       name: 'extension',
       type: 'text',
-      label: 'امتداد الملف',
+      label: 'امتداد ملف',
       value: null,
     },
     {
       name: 'mediaId',
       type: 'select',
-      label: 'الوسيطة',
+      label: 'وسيطة',
       options: options.medias,
       value: null
     },
     {
       name: 'typeId',
       type: 'snippet',
-      label: 'النوع',
+      label: 'نوع',
       options: options.types,
       value: null,
       snippet: typeSelect
@@ -85,7 +85,7 @@
     {
       name: 'contentId',
       type: 'snippet',
-      label: 'الموضوع',
+      label: 'موضوع',
       options: options.contents,
       value: null,
       snippet: contentSelect

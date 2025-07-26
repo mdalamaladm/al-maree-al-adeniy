@@ -28,17 +28,17 @@
 
   let globalOptions = $derived([
     {
-      name: 'الوسيطة',
+      name: 'وسيطة',
       type: 'media',
       options: options.medias
     },
     {
-      name: 'النوع',
+      name: 'نوع',
       type: 'type',
       options: options.types
     },
     {
-      name: 'الموضوع',
+      name: 'موضوع',
       type: 'content',
       options: contentOptions
     }
@@ -121,17 +121,17 @@
             status: 'ready',
             options: [
               {
-                name: 'الوسيطة',
+                name: 'وسيطة',
                 type: 'media',
                 options: options.medias
               },
               {
-                name: 'النوع',
+                name: 'نوع',
                 type: 'type',
                 options: options.types
               },
               {
-                name: 'الموضوع',
+                name: 'موضوع',
                 type: 'content',
                 options: options.contents.filter(e => !e.isLecture)
               }
@@ -586,7 +586,7 @@
       onclick={() => modal.open(uploadList, { center: false, className: 'w-full h-full bg-white' })}
       type="solid"
       color="secondary"
-      label="التحميلات"
+      label="تحميلات"
       class="
         box-border
         border-4
@@ -603,7 +603,7 @@
       font-medium
     "
   >
-    التحميل
+    تحميل
   </h1>
   <div
     class="
@@ -650,7 +650,7 @@
     >
       <InputFile
         onInput={onInputFiles}
-        label="إدراج الملفات"
+        label="إدراج ملفات"
       />
       <Button
         onclick={onUpload}

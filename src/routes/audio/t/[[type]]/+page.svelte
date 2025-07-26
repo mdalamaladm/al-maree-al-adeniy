@@ -13,8 +13,6 @@
 
   let trackNumber = $state(data.playlist[0]?.id);
   let trackSrc = $state(null);
-  let trackDuration = $state(null);
-  let trackLength = $state(null);
 
   let track = $derived.by(() => {
     return data.playlist.find(s => s.id === trackNumber) || { name: '' };
@@ -110,7 +108,7 @@
         },
         {
           href: '/audio',
-          name: 'الصوتية'
+          name: 'صوتيات'
         },
         {
           name: data.typeName

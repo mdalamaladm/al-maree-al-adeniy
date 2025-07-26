@@ -19,7 +19,7 @@
 
   let items = $derived.by(() => [
     {
-      name: 'الملف',
+      name: 'ملف',
       props: {
         auth: data.auth,
         files,
@@ -34,7 +34,7 @@
       formAction: '?/loadFile',
     },
     {
-      name: 'الوسيطة',
+      name: 'وسيطة',
       props: { 
         medias,
       },
@@ -42,7 +42,7 @@
       formAction: '?/loadMedia',
     },
     {
-      name: 'النوع',
+      name: 'نوع',
       props: {
         types,
       },
@@ -50,7 +50,7 @@
       formAction: '?/loadType',
     },
     {
-      name: 'الموضوع',
+      name: 'موضوع',
       props: {
         contents,
       },
@@ -134,7 +134,7 @@
       type="solid"
       color="secondary"
       class="bg-red-600"
-      label="تسجيل الخروج"
+      label="تسجيل خروج"
       submit
     />
   </form>

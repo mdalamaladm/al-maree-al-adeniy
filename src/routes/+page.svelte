@@ -1,11 +1,11 @@
 <script>
   let navigations = [
     {
-      name: 'الصوتية',
+      name: 'صوتيات',
       href: '/audio',
     },
     // {
-    //   name: 'الفيديو',
+    //   name: 'فيديوهات',
     //   href: '/video',
     // },
   ]

@@ -32,20 +32,20 @@
 				text-maree-darker-accent
 			"
 		>
-			تسجيل الدخول
+			تسجيل دخول
 		</p>
 		<div
 			class="mb-10"
 		>
 			<InputText
-				label="الاسم المستخدم"
+				label="اسم مستخدم"
 				name="username"
 				class="
 					mb-5
 				"
 			/>
 			<InputPassword
-				label="كلمة المرور"
+				label="كلمة مرور"
 				name="password"
 			/>
 		</div>
@@ -54,7 +54,7 @@
 			color="secondary"
 			submit
 			block
-			label="تسجيل الدخول"
+			label="تسجيل دخول"
 		/>
 	</form>
 </section>

@@ -9,27 +9,27 @@
 
   let columns = [
     {
-      name: 'اسم النوع',
+      name: 'اسم نوع',
       key: 'name'
     },
     {
-      name: 'لقب النوع',
+      name: 'لقب نوع',
       key: 'alias',
     },
     {
-      name: 'تاريخ الصناعة',
+      name: 'تاريخ صناعة',
       key: 'createdAt'
     },
     {
-      name: 'تاريخ التعديل',
+      name: 'تاريخ تعديل',
       key: 'updatedAt'
     },
     {
-      name: 'فاعل الصناعة',
+      name: 'فاعل صناعة',
       key: 'createdBy'
     },
     {
-      name: 'فاعل التعديل',
+      name: 'فاعل تعديل',
       key: 'updatedBy'
     },
     {
@@ -43,13 +43,13 @@
     {
       name: 'name',
       type: 'text',
-      label: 'اسم النوع',
+      label: 'اسم نوع',
       value: null,
     },
     {
       name: 'alias',
       type: 'text',
-      label: 'لقب النوع',
+      label: 'لقب نوع',
       value: null
     },
   ]);

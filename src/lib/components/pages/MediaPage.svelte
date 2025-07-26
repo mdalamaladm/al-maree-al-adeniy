@@ -9,32 +9,32 @@
 
   let columns = [
     {
-      name: 'اسم الوسيطة',
+      name: 'اسم وسيطة',
       key: 'name'
     },
     {
-      name: 'لقب الوسيطة',
+      name: 'لقب وسيطة',
       key: 'alias',
     },
     {
-      name: 'الأنواع',
+      name: 'أنواع',
       slot: 'types',
       width: '300px',
     },
     {
-      name: 'تاريخ الصناعة',
+      name: 'تاريخ صناعة',
       key: 'createdAt'
     },
     {
-      name: 'تاريخ التعديل',
+      name: 'تاريخ تعديل',
       key: 'updatedAt'
     },
     {
-      name: 'فاعل الصناعة',
+      name: 'فاعل صناعة',
       key: 'createdBy'
     },
     {
-      name: 'فاعل التعديل',
+      name: 'فاعل تعديل',
       key: 'updatedBy'
     },
     {
@@ -48,13 +48,13 @@
     {
       name: 'name',
       type: 'text',
-      label: 'اسم الوسيطة',
+      label: 'اسم وسيطة',
       value: null,
     },
     {
       name: 'alias',
       type: 'text',
-      label: 'لقب الوسيطة',
+      label: 'لقب وسيطة',
       value: null
     },
   ])
