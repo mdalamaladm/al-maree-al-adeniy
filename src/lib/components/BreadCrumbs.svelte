@@ -1,7 +1,7 @@
 <script>
 	import HomeIcon from "$lib/icons/HomeIcon.svelte";
 
-  let { items, class: className = '' } = $props();
+  let { items, class: className = '', color = 'text-maree-dark-accent' } = $props();
 </script>
 
 <div
@@ -17,8 +17,8 @@
       <p
         class="
           text-2xl
-          text-maree-dark-accent
           select-none
+          {color}
         "
       >
         /
@@ -32,8 +32,8 @@
           mx-2
           md:mx-5
           text-2xl
-          text-maree-dark-accent
           select-none
+          {color}
         "
       >
         {item.name}
@@ -45,7 +45,7 @@
           my-2
           mx-2
           md:mx-5
-          text-maree-dark-accent
+          {color}
         "
       >
         <HomeIcon
@@ -62,7 +62,7 @@
           mx-2
           md:mx-5
           text-2xl
-          text-maree-dark-accent
+          {color}
         "
       >
         {item.name}

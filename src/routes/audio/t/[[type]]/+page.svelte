@@ -52,11 +52,9 @@
         }
       });
 
-      const { src, duration, length } = await response.json();
+      const { src } = await response.json();
 
       trackSrc = src;
-      trackDuration = duration;
-      trackLength = length;
     }
 
     run();
@@ -114,6 +112,7 @@
           name: data.typeName
         },
       ]}
+      color="text-maree-secondary"
       class="
         mx-3
         md:mx-10
@@ -130,7 +129,7 @@
         ml-5
         mr-2
         md:mr-5
-        text-maree-dark-accent
+        text-maree-secondary
         cursor-pointer
       "
     >

@@ -1,7 +1,10 @@
+import { createCustomFetch } from '$lib/fetch.js';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-  editFile: async ({ url, request, fetch, cookies }) => {
+  editFile: async (params) => {
+    const { url, request, cookies } = params;
+
     const formData = await request.formData();
     const name = formData.get('name');
     const extension = formData.get('extension');
@@ -17,7 +20,9 @@ export const actions = {
       contentId: +contentId,
     };
 
-    await fetch(`/api/admin/file/${url.searchParams.get('id')}`, {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/file/${url.searchParams.get('id')}`, {
       method: 'PUT',
       headers: {
         "Content-Type": "application/json",
@@ -30,8 +35,10 @@ export const actions = {
       success: true,
     }
   },
-  deleteFile: async ({ url, fetch, cookies }) => {
-    await fetch(`/api/admin/file/${url.searchParams.get('id')}`, {
+  deleteFile: async (params) => {
+    const { url, cookies } = params;
+
+    await customFetch(`/admin/file/${url.searchParams.get('id')}`, {
       method: 'DELETE',
       headers: {
         "Authorization": `Bearer ${cookies.get('auth')}`
@@ -42,7 +49,9 @@ export const actions = {
       success: true
     }
   },
-  createMedia: async ({ request, fetch, cookies }) => {
+  createMedia: async (params) => {
+    const { request, cookies } = params;
+
     const formData = await request.formData();
     const name = formData.get('name');
     const alias = formData.get('alias');
@@ -52,7 +61,79 @@ export const actions = {
       alias,
     };
 
-    await fetch('/api/admin/media', {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch('/admin/media', {
+      method: 'POST',
+      // headers: {
+      //   "Content-Type": "application/json",
+      //   "Authorization": `Bearer ${cookies.get('auth')}`
+      // },
+      body: JSON.stringify(payload),
+    });
+
+    return {
+      success: true,
+    }
+  },
+  editMedia: async (params) => {
+    const { url, request, cookies } = params;
+
+    const formData = await request.formData();
+    const name = formData.get('name');
+    const alias = formData.get('alias');
+
+    const payload = {
+      name,
+      alias,
+    };
+
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/media/${url.searchParams.get('id')}`, {
+      method: 'PUT',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return {
+      success: true,
+    }
+  },
+  deleteMedia: async (params) => {
+    const { url, cookies } = params;
+
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/media/${url.searchParams.get('id')}`, {
+      method: 'DELETE',
+      headers: {
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      },
+    });
+
+    return {
+      success: true
+    }
+  },
+  createType: async (params) => {
+    const { request, cookies } = params;
+
+    const formData = await request.formData();
+    const name = formData.get('name');
+    const alias = formData.get('alias');
+
+    const payload = {
+      name,
+      alias,
+    };
+
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch('/admin/type', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +146,9 @@ export const actions = {
       success: true,
     }
   },
-  editMedia: async ({ url, request, fetch, cookies }) => {
+  editType: async (params) => {
+    const { url, request, cookies } = params;
+
     const formData = await request.formData();
     const name = formData.get('name');
     const alias = formData.get('alias');
@@ -75,7 +158,9 @@ export const actions = {
       alias,
     };
 
-    await fetch(`/api/admin/media/${url.searchParams.get('id')}`, {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/type/${url.searchParams.get('id')}`, {
       method: 'PUT',
       headers: {
         "Content-Type": "application/json",
@@ -88,8 +173,12 @@ export const actions = {
       success: true,
     }
   },
-  deleteMedia: async ({ url, fetch, cookies }) => {
-    await fetch(`/api/admin/media/${url.searchParams.get('id')}`, {
+  deleteType: async (params) => {
+    const { url, fetch, cookies } = params;
+
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/type/${url.searchParams.get('id')}`, {
       method: 'DELETE',
       headers: {
         "Authorization": `Bearer ${cookies.get('auth')}`
@@ -100,72 +189,18 @@ export const actions = {
       success: true
     }
   },
-  createType: async ({ request, fetch, cookies }) => {
-    const formData = await request.formData();
-    const name = formData.get('name');
-    const alias = formData.get('alias');
+  createContent: async (params) => {
+    const { request, cookies } = params;
 
-    const payload = {
-      name,
-      alias,
-    };
-
-    await fetch('/api/admin/type', {
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${cookies.get('auth')}`
-      },
-      body: JSON.stringify(payload),
-    });
-
-    return {
-      success: true,
-    }
-  },
-  editType: async ({ url, request, fetch, cookies }) => {
-    const formData = await request.formData();
-    const name = formData.get('name');
-    const alias = formData.get('alias');
-
-    const payload = {
-      name,
-      alias,
-    };
-
-    await fetch(`/api/admin/type/${url.searchParams.get('id')}`, {
-      method: 'PUT',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${cookies.get('auth')}`
-      },
-      body: JSON.stringify(payload),
-    });
-
-    return {
-      success: true,
-    }
-  },
-  deleteType: async ({ url, fetch, cookies }) => {
-    await fetch(`/api/admin/type/${url.searchParams.get('id')}`, {
-      method: 'DELETE',
-      headers: {
-        "Authorization": `Bearer ${cookies.get('auth')}`
-      },
-    });
-
-    return {
-      success: true
-    }
-  },
-  createContent: async ({ request, fetch, cookies }) => {
     const formData = await request.formData();
     const name = formData.get('name');
     const isLecture = formData.has('isLecture');
 
     const payload = { name, isLecture };
 
-    await fetch('/api/admin/content', {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch('/admin/content', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",
@@ -178,14 +213,18 @@ export const actions = {
       success: true,
     }
   },
-  editContent: async ({ url, request, fetch, cookies }) => {
+  editContent: async (params) => {
+    const { url, request, cookies } = params;
+
     const formData = await request.formData();
     const name = formData.get('name');
     const isLecture = formData.has('isLecture');
 
     const payload = { name, isLecture };
 
-    await fetch(`/api/admin/content/${url.searchParams.get('id')}`, {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/content/${url.searchParams.get('id')}`, {
       method: 'PUT',
       headers: {
         "Content-Type": "application/json",
@@ -198,8 +237,12 @@ export const actions = {
       success: true,
     }
   },
-  deleteContent: async ({ url, fetch, cookies }) => {
-    await fetch(`/api/admin/content/${url.searchParams.get('id')}`, {
+  deleteContent: async (params) => {
+    const { url, cookies } = params;
+
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    await customFetch(`/admin/content/${url.searchParams.get('id')}`, {
       method: 'DELETE',
       headers: {
         "Authorization": `Bearer ${cookies.get('auth')}`
@@ -213,15 +256,19 @@ export const actions = {
   logout: async ({ cookies }) => {
     cookies.delete('auth', { path: '/admin' });
 
-    redirect(303, '/admin/manage');
+    redirect(303, '/admin/login');
   }
 }
 
-export async function load ({ fetch, cookies, url }) {
+export async function load (params) {
+  const { cookies, url } = params;
+
   const auth = cookies.get('auth');
 
+  const customFetch = createCustomFetch({ ...params, redirect })
+
   async function loadFiles () {
-    const res = await fetch('/api/admin/file', {
+    const res = await customFetch('/admin/file', {
       headers: {
         "Authorization": `Bearer ${auth}`
       }
@@ -231,7 +278,7 @@ export async function load ({ fetch, cookies, url }) {
   }
 
   async function loadMedias () {
-    const res = await fetch('/api/admin/media', {
+    const res = await customFetch('/admin/media', {
       headers: {
         "Authorization": `Bearer ${auth}`
       }
@@ -241,7 +288,7 @@ export async function load ({ fetch, cookies, url }) {
   }
 
   async function loadTypes () {
-    const res = await fetch('/api/admin/type', {
+    const res = await customFetch('/admin/type', {
       headers: {
         "Authorization": `Bearer ${auth}`
       }
@@ -251,7 +298,7 @@ export async function load ({ fetch, cookies, url }) {
   }
 
   async function loadContents () {
-    const res = await fetch('/api/admin/content', {
+    const res = await customFetch('/admin/content', {
       headers: {
         "Authorization": `Bearer ${auth}`
       }

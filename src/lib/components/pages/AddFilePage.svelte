@@ -1,6 +1,7 @@
 <script>
 	import { goto } from "$app/navigation";
 	import InputFile from "$lib/components/input/InputFile.svelte";
+	import { createCustomFetch } from "$lib/fetch";
 	import ArrowPathIcon from "$lib/icons/ArrowPathIcon.svelte";
 	import CloseIcon from "$lib/icons/CloseIcon.svelte";
 	import { manage } from "../../../routes/admin/manage/manage.svelte";
@@ -10,6 +11,8 @@
 	import { modal } from "../modal.svelte";
 
   let { options, auth } = $props();
+
+  const customFetch = createCustomFetch()
 
   let typeValue = $state({
     media: undefined,
@@ -186,7 +189,7 @@
       file.meta.status = 'wait';
 
       if (!isProgressing) {
-        const resUploadPresigned = await fetch(`/api/admin/file/upload/presigned`, {
+        const resUploadPresigned = await customFetch(`/admin/file/upload/presigned`, {
           method: 'GET',
           headers: {
             "Authorization": `Bearer ${auth}`
@@ -226,7 +229,7 @@
             contentId: file.meta.content,
           };
 
-          const res = await fetch('/api/admin/file', {
+          const res = await customFetch('/admin/file', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

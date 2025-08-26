@@ -1,14 +1,19 @@
+import { createCustomFetch } from '$lib/fetch.js';
 import { redirect } from '@sveltejs/kit';
 
 export const actions = {
-  default: async ({ cookies, request, fetch }) => {
+  default: async (params) => {
+    const { cookies, request } = params;
+
     const formData = await request.formData();
     const username = formData.get('username');
     const password = formData.get('password');
 
     const payload = { username, password };
 
-    const res = await fetch('/api/admin/auth', {
+    const customFetch = createCustomFetch({ ...params, redirect })
+
+    const res = await customFetch('/admin/auth', {
       method: 'POST',
       headers: {
         "Content-Type": "application/json",

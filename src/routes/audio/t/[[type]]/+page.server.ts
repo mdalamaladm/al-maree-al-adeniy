@@ -1,12 +1,20 @@
-export async function load ({ params, fetch, url }) {
+import { createCustomFetch } from '$lib/fetch.js';
+import { redirect } from '@sveltejs/kit';
+
+export async function load (loadParams) {
+  const { params } = loadParams
+
+  const customFetch = createCustomFetch({ ...loadParams, redirect });
+  
+  
   async function loadContents () {
-    const res = await fetch(`/api/content?${new URLSearchParams({ typeId: params.type })}`);
+    const res = await customFetch(`/content?${new URLSearchParams({ typeId: params.type })}`);
 
     return await res.json();
   }
 
   async function loadType () {
-    const res = await fetch(`/api/type/${params.type}`);
+    const res = await customFetch(`/type/${params.type}`);
 
     return await res.json();
   }
@@ -18,7 +26,7 @@ export async function load ({ params, fetch, url }) {
       typeId: id,
     });
 
-    const res = await fetch(`/api/file?${searchParams}`);
+    const res = await customFetch(`/file?${searchParams}`);
 
     return await res.json();
   }

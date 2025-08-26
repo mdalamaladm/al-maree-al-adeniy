@@ -1,8 +1,16 @@
-export async function load ({ fetch, url }) {
+import { createCustomFetch } from '$lib/fetch.js';
+import { redirect } from '@sveltejs/kit';
+
+export async function load (params) {
+  const { url } = params
+
+  const customFetch = createCustomFetch({ ...params, redirect });
+
   async function loadMedia () {
     const id = url.pathname.slice(1);
 
-    const res = await fetch(`/api/media/${id}`);
+
+    const res = await customFetch(`/media/${id}`);
 
     return await res.json();
   }
