@@ -38,6 +38,8 @@ export const actions = {
   deleteFile: async (params) => {
     const { url, cookies } = params;
 
+    const customFetch = createCustomFetch({ ...params, redirect })
+
     await customFetch(`/admin/file/${url.searchParams.get('id')}`, {
       method: 'DELETE',
       headers: {
