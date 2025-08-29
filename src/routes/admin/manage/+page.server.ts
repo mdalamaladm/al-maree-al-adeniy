@@ -67,10 +67,10 @@ export const actions = {
 
     await customFetch('/admin/media', {
       method: 'POST',
-      // headers: {
-      //   "Content-Type": "application/json",
-      //   "Authorization": `Bearer ${cookies.get('auth')}`
-      // },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${cookies.get('auth')}`
+      },
       body: JSON.stringify(payload),
     });
 
