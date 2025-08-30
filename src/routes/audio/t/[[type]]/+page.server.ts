@@ -27,7 +27,7 @@ export async function load (loadParams) {
     };
 
     if (id === 'durus') {
-      searchParams.contentId = contents[0].id;
+      searchParams.contentId = contents[0]?.id || null;
     }
 
     searchParams = new URLSearchParams(searchParams);
@@ -41,19 +41,12 @@ export async function load (loadParams) {
   const type = await loadType();
   let playlist = await loadFiles(contents);
 
-  playlist = playlist
-    .map(f => ({
-      ...f,
-      content: f.content.id,
-      amplitudes: JSON.parse(f.amplitudes),
-    }));
-    
-  if (params.type !== 'durus') {
+  if (contents && params.type !== 'durus') {
     contents = [
       { name: 'كل موضوع', id: null },
       ...contents
     ];
-  }
+  } else contents = []
 
   contents = contents
     .filter(c => c.id !== 1)
