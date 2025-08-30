@@ -1,7 +1,7 @@
 <script>
 	import InputText from "../input/InputText.svelte";
 
-  let { class: className = '', listClass = '', onChangeAudio, playlist, trackNumber } = $props();
+  let { class: className = '', listClass = '', onChangeAudio, playlist, trackId } = $props();
 
   let search = $state('');
   let searchedPlaylist = $derived.by(() => {
@@ -58,7 +58,7 @@
           flex-none
           p-3
           mb-2
-          ${trackNumber === sound.id ? 'bg-maree-darker-accent' : ''}
+          ${trackId === sound.id ? 'bg-maree-darker-accent' : ''}
           hover:bg-maree-darker-accent
           active:bg-maree-darker-accent
           text-start

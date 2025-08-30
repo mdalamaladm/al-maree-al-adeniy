@@ -25,7 +25,7 @@
 
 
   let contentOptions = $derived.by(() => {
-    if (typeValue.type === 'durus') return options.contents.filter(e => e.isLecture || e.value === 1);
+    if (typeValue.type === 'durus') return options.contents.filter(e => e.isLecture);
     else return options.contents.filter(e => !e.isLecture);
   });
 
@@ -59,7 +59,7 @@
       typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
       if (v === 'durus') {
-        typeValue.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
+        typeValue.content = options.contents.filter(e => e.isLecture)[0].value;
       } else {
         typeValue.content = options.contents.filter(e => !e.isLecture)[0].value;
       }
@@ -75,8 +75,8 @@
       file.meta.content = options.contents.filter(e => !e.isLecture)[0].value;
     } else if (option.type === 'type') {
       if (v === 'durus') {
-        file.meta.options[2].options = options.contents.filter(e => e.isLecture || e.value === 1);
-        file.meta.content = options.contents.filter(e => e.isLecture || e.value === 1)[0].value;
+        file.meta.options[2].options = options.contents.filter(e => e.isLecture);
+        file.meta.content = options.contents.filter(e => e.isLecture)[0].value;
       } else {
         file.meta.options[2].options = options.contents.filter(e => !e.isLecture);
         file.meta.content = options.contents.filter(e => !e.isLecture)[0].value;
@@ -136,7 +136,9 @@
               {
                 name: 'موضوع',
                 type: 'content',
-                options: options.contents.filter(e => !e.isLecture)
+                options: typeValue.type === 'durus'
+                  ? options.contents.filter(e => e.isLecture)
+                  : options.contents.filter(e => !e.isLecture)
               }
             ],
           },

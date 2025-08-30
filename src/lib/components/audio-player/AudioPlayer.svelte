@@ -7,7 +7,6 @@
   let chunk = $state(60);
   let _amplitudes = $state(new Array(chunk).fill(-1));
   let _id = $state(null);
-  let rawData = [];
   let innerWidth = $state(null);
   let audioElement = $state(null);
   let currentTime = $state(0);

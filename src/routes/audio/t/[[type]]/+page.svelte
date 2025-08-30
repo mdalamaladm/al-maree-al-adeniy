@@ -5,46 +5,70 @@
 	import Overlay from "$lib/components/Overlay.svelte";
   import BreadCrumbs from "$lib/components/BreadCrumbs.svelte";
 	import InboxIcon from "$lib/icons/InboxIcon.svelte";
+	import { tick } from "svelte";
 
   let { data } = $props();
 
   let open = $state(false);
   let content = $state(null);
+  let playlist = $state([]);
 
-  let trackNumber = $state(data.playlist[0]?.id);
+  let trackId = $state(null);
   let trackSrc = $state(null);
 
   let track = $derived.by(() => {
-    return data.playlist.find(s => s.id === trackNumber) || { name: '' };
+    return playlist?.find(s => s.id === trackId) || { name: '' };
   });
   let filteredPlaylist = $derived.by(() => {
     if (content) {
-      return data.playlist.filter(p => p.content === content);
+      return playlist?.filter(p => p.content === content) || [];
     } else {
-      return data.playlist;
+      return playlist;
     }
   })
 
   function onChangeAudio (id) {
-    trackNumber = id;
+    trackId = id;
     open = false;
   }
 
   function handleEnd () {
-    if (trackNumber === data.playlist.length - 1) {
-      trackNumber = 0;
+    if (trackId === playlist?.length - 1) {
+      trackId = playlist?.[0].id;
     } else {
-      trackNumber++;
+      trackId++;
     }
   }
   
   function onResize () {
     open = false;
   }
+  
+  async function onChangeContent() {
+    if (data.typeAlias === 'durus') {
+      const response = await fetch('/audio', {
+        method: 'POST',
+        body: JSON.stringify({ content, type: data.typeAlias }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const { playlist: newPlaylist } = await response.json();
+
+      playlist = newPlaylist
+        .map(f => ({
+        ...f,
+        content: f.content.id,
+        amplitudes: JSON.parse(f.amplitudes),
+      }));
+      trackId = newPlaylist[0]?.id;
+    }
+  }
 
   $effect(() => {
     async function run () {
-      const response = await fetch('/audio', {
+      const response = await fetch('/audio/byId', {
         method: 'POST',
         body: JSON.stringify({ id: track.id }),
         headers: {
@@ -56,9 +80,25 @@
 
       trackSrc = src;
     }
-
+    
     run();
   })
+
+  $effect(() => {
+    async function run () {
+      if (data.typeAlias === 'durus') {
+        content = data.contents[0].value
+      }
+
+      await tick()
+      
+      playlist = data.playlist;
+      trackId = data.playlist[0]?.id
+    }
+
+    run()
+  })
+
 </script>
 
 <svelte:window
@@ -80,7 +120,7 @@
     <Playlist
       {onChangeAudio}
       playlist={filteredPlaylist}
-      {trackNumber}
+      {trackId}
       class="
         h-full
         w-full
@@ -145,10 +185,11 @@
     <Playlist
       {onChangeAudio}
       playlist={filteredPlaylist}
-      {trackNumber}
+      {trackId}
       class="
         hidden
         lg:block
+        lg:mr-5
       "
       listClass="
         min-h-[550px]
@@ -179,6 +220,7 @@
       >
         <select
           bind:value={content}
+          onchange={onChangeContent}
           class="
             w-[250px]
             py-5
@@ -194,6 +236,7 @@
       <p
         class="
           mb-10
+          mx-5
           text-maree-secondary
           text-3xl
           font-medium
@@ -202,7 +245,7 @@
       >
         {track.name}
       </p>
-      {#if data.playlist.length > 0}
+      {#if playlist?.length > 0}
         <AudioPlayer
           id={track.id}
           src={trackSrc}

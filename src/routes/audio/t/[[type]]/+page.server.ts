@@ -19,19 +19,28 @@ export async function load (loadParams) {
     return await res.json();
   }
 
-  async function loadFiles () {
+  async function loadFiles (contents) {
     const id = params.type;
-    const searchParams = new URLSearchParams({
+    let searchParams = {
       mediaId: 'audio',
       typeId: id,
-    });
+    };
+
+    if (id === 'durus') {
+      searchParams.contentId = contents[0].id;
+    }
+
+    searchParams = new URLSearchParams(searchParams);
 
     const res = await customFetch(`/file?${searchParams}`);
 
     return await res.json();
   }
 
-  let playlist = await loadFiles();
+  let contents = await loadContents();
+  const type = await loadType();
+  let playlist = await loadFiles(contents);
+
   playlist = playlist
     .map(f => ({
       ...f,
@@ -39,17 +48,18 @@ export async function load (loadParams) {
       amplitudes: JSON.parse(f.amplitudes),
     }));
     
-  const type = await loadType();
-  let contents = await loadContents();
-  contents = [
-    { name: 'كل موضوع', id: null },
-    ...contents
-  ];
+  if (params.type !== 'durus') {
+    contents = [
+      { name: 'كل موضوع', id: null },
+      ...contents
+    ];
+  }
+
   contents = contents
     .filter(c => c.id !== 1)
     .map(c => ({
       name: c.name,
-      value: c.id
+      value: c.id,
     }));
 
   return {

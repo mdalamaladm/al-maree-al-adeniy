@@ -5,12 +5,18 @@ import { json } from '@sveltejs/kit';
 export async function POST (params) {
   const { request } = params;
 
-  const { id } = await request.json();
+  const { content, type } = await request.json();
+
+  const searchParams = new URLSearchParams({
+    mediaId: 'audio',
+    typeId: type,
+    contentId: content,
+  })
 
   const customFetch = createCustomFetch({ ...params, redirect });
 
-  const res = await customFetch(`/file/${id}`);
-  const { src } = await res.json();
+  const res = await customFetch(`/file?${searchParams}`);
+  const playlist = await res.json();
 
-  return json({ src }, { status: 201 });
+  return json({ playlist }, { status: 201 });
 }
